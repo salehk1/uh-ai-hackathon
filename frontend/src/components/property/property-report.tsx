@@ -142,12 +142,12 @@ function ReportView({
       <BackLink href={backHref} />
 
       {/* identity */}
-      <header className="blueprint mt-4 grid gap-5 rounded-[24px] border border-line p-4 sm:p-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-7">
-        <motion.div initial={{ opacity: 0, scale: 0.985 }} animate={{ opacity: 1, scale: 1 }} className="self-start lg:order-last">
+      <header className="blueprint mt-4 grid grid-cols-1 gap-5 rounded-[24px] border border-line p-4 sm:p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-7">
+        <motion.div initial={{ opacity: 0, scale: 0.985 }} animate={{ opacity: 1, scale: 1 }} className="w-full min-w-0 self-start lg:order-last">
           <PhotoGallery key={l.zpid} photos={r.photos} zpid={l.zpid} homeType={l.home_type ?? null} photoCount={isKnown(l.photo_count) ? l.photo_count : null} />
         </motion.div>
 
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <p className="tabular text-[13px] text-ink-3">
             Listing {l.zpid}
             {l.mls_id ? ` · MLS ${l.mls_id}` : ""}
