@@ -15,6 +15,8 @@ import pandas as pd
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
@@ -46,6 +48,13 @@ BCOLS = [f"b_{c}" for c in ["intercept"] + META["vars"]]
 
 app = FastAPI(title="Houston Price Receipt")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+STATIC = ROOT / "api/static"
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def index():
+    return FileResponse(STATIC / "index.html")
 
 
 def q(sql, params=()):
