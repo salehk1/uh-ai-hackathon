@@ -67,3 +67,18 @@ describe("/report contract", () => {
     expect(normalizeVisual({ type: "report", data: { nope: 1 } }).type).toBe("unsupported");
   });
 });
+
+describe("report photos (additive field)", () => {
+  const z = "https://photos.zillowstatic.com/fp/c6c062dff7216f0715e224ea3c8eb3e8";
+  const ok = { thumb_url: `${z}-d_d.jpg`, full_url: `${z}-uncropped_scaled_within_1536_1152.jpg`, full_width: 1536 };
+  it("defaults to no photos when an older backend omits the field", () => {
+    expect(parse(sample).photos).toEqual([]);
+  });
+  it("keeps valid photos in order and drops ones from other hosts or with bad URLs", () => {
+    const evil = { thumb_url: "https://example.com/x.jpg", full_url: "https://example.com/x.jpg" };
+    const insecure = { thumb_url: `http://photos.zillowstatic.com/fp/a.jpg`, full_url: ok.full_url };
+    const photos = parse({ ...sample, photos: [ok, evil, insecure, { ...ok, caption: "Kitchen" }, "nope"] }).photos;
+    expect(photos).toHaveLength(2);
+    expect(photos[1].caption).toBe("Kitchen");
+  });
+});
