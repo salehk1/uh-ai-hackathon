@@ -41,7 +41,8 @@ def build(df):
 
     df["age"] = (2024 - df.yearBuilt).clip(lower=0)
     df["monthlyHoaFee"] = df.monthlyHoaFee.fillna(0)
-    df["lotSize_acres"] = df.lotSize_acres.fillna(df.groupby("homeType").lotSize_acres.transform("median"))
+    for c in ["lotSize_acres", "bedrooms", "bathrooms"]:
+        df[c] = df[c].fillna(df.groupby("homeType")[c].transform("median"))
     df["age"] = df.age.fillna(df.age.median())
     for k, (la, lo_) in POIS.items():
         df[f"dist_{k}"] = haversine_km(df.latitude, df.longitude, la, lo_)

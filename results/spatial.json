@@ -1,0 +1,69 @@
+{
+  "engine": "q",
+  "n": 21659,
+  "moran_log_ppsf": {
+    "I": 0.5618,
+    "expected": -5e-05,
+    "p_perm": 0.01
+  },
+  "moran_ols_resid_insample": {
+    "I": 0.4345,
+    "expected": -5e-05,
+    "p_perm": 0.01
+  },
+  "moran_gwr_resid_insample": {
+    "I": 0.0508,
+    "expected": -5e-05,
+    "p_perm": 0.01
+  },
+  "gwr_cv_rmse": {
+    "50": 0.257720058194392,
+    "100": 0.23598828684253992,
+    "200": 0.22534137500071671
+  },
+  "gwr_k": 200,
+  "gwr_coef_summary": {
+    "b_intercept": {
+      "mean": 5.0476,
+      "std": 0.9232,
+      "min": -0.7663,
+      "max": 12.7984
+    },
+    "b_livingArea": {
+      "mean": -0.0568,
+      "std": 0.1355,
+      "min": -0.5545,
+      "max": 0.3893
+    },
+    "b_age": {
+      "mean": -0.019,
+      "std": 0.1881,
+      "min": -0.6833,
+      "max": 1.7311
+    },
+    "b_school_mean": {
+      "mean": 0.0459,
+      "std": 0.1972,
+      "min": -0.873,
+      "max": 3.7744
+    },
+    "b_dist_downtown": {
+      "mean": -0.0619,
+      "std": 0.7441,
+      "min": -4.1487,
+      "max": 3.9742
+    },
+    "b_bedrooms": {
+      "mean": -0.021,
+      "std": 0.0721,
+      "min": -0.2779,
+      "max": 0.2487
+    },
+    "b_bathrooms": {
+      "mean": 0.0182,
+      "std": 0.0668,
+      "min": -0.2503,
+      "max": 0.2739
+    }
+  }
+}
