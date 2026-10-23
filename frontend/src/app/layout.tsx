@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import { DataSourceBanner } from "@/components/data-source";
+import { LicenseFooter } from "@/components/license-footer";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 
@@ -11,9 +12,9 @@ const ui = Inter({ subsets: ["latin"], variable: "--font-ui", display: "swap" })
 const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display-face", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Houston Price Receipt", template: "%s · Houston Price Receipt" },
+  title: { default: "QuantHouse", template: "%s · QuantHouse" },
   description:
-    "Compare Houston asking prices with a spatially validated model estimate and see an itemized, location-specific price receipt.",
+    "A due-diligence report for a Houston listing: is the price reasonable, does the listing check out, and what will it cost per month?",
 };
 
 export const viewport: Viewport = { themeColor: "#f6f4ee", width: "device-width", initialScale: 1 };
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main id="main" className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
             {children}
           </main>
+          <LicenseFooter />
         </Providers>
       </body>
     </html>

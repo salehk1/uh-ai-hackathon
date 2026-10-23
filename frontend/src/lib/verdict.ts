@@ -1,10 +1,11 @@
-import type { Verdict } from "./api/schemas";
+import type { ReportVerdict, Verdict } from "./api/schemas";
 import { signedPctFromFraction, usd } from "./format";
 
-export const VERDICT_TEXT: Record<Verdict, { short: string; long: string }> = {
-  high: { short: "Above range", long: "Above estimated range" },
-  low: { short: "Below range", long: "Below estimated range" },
-  expected: { short: "Within range", long: "Within estimated range" },
+export const VERDICT_TEXT: Record<ReportVerdict, { short: string; long: string }> = {
+  high: { short: "Above range", long: "Priced above fair range" },
+  low: { short: "Below range", long: "Priced below fair range" },
+  expected: { short: "Within range", long: "Priced within fair range" },
+  unknown: { short: "No verdict", long: "No verdict (outside model scope)" },
 };
 
 /**

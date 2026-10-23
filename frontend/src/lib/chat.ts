@@ -4,10 +4,11 @@
  *  - bar:     { labels, series: [{ name, values }] } (from `compare` or `stats`)
  *  - receipt: get_home → { zpid, price, items, gwr_price, total }
  *             predict  → { items, gwr_price, total, pred_price }
+ *  - report:  the full /report object (from the `report` tool), shown as a compact card
  * Anything else becomes an "unsupported" visual that renders a small local notice.
  */
 import { z } from "zod";
-import { receiptItemSchema, verdictSchema, type Receipt } from "./api/schemas";
+import { receiptItemSchema, reportSchema, verdictSchema, type Receipt, type Report } from "./api/schemas";
 
 export type MapPoint = {
   lon: number;
@@ -29,6 +30,7 @@ export type ChatVisual =
       askingPrice: number | null;
       predPrice: number | null;
     }
+  | { type: "report"; report: Report }
   | { type: "unsupported"; reason: string };
 
 const finite = z.number().finite();
@@ -114,6 +116,12 @@ export function normalizeVisual(raw: unknown): ChatVisual {
       askingPrice: isListing ? (d.price ?? null) : null,
       predPrice: d.pred_price ?? (isListing ? null : d.total),
     };
+  }
+
+  if (type === "report") {
+    const r = reportSchema.safeParse(data);
+    if (!r.success) return { type: "unsupported", reason: "Report data was malformed" };
+    return { type: "report", report: r.data };
   }
 
   return { type: "unsupported", reason: `Unsupported visual type "${String(type)}"` };

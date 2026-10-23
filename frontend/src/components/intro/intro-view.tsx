@@ -87,10 +87,10 @@ export function IntroView() {
             <Logo className="size-9" />
             <span className="text-[13px] font-semibold uppercase tracking-[0.12em] text-forest">Houston · 2024 listings</span>
           </div>
-          <h1 className="mt-5 font-display text-[44px] leading-[1.02] tracking-tight text-ink sm:text-[64px]">Houston Price Receipt</h1>
+          <h1 className="mt-5 font-display text-[44px] leading-[1.02] tracking-tight text-ink sm:text-[64px]">QuantHouse</h1>
           <p className="mt-4 max-w-[30rem] text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
-            See how a listing&apos;s asking price compares with a spatially validated model estimate, and read the itemized,
-            neighborhood-specific receipt behind it.
+            One report for any Houston listing, answering three separate questions: is the price reasonable, does the listing check
+            out, and what will it cost per month?
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-4">
             <Button ref={exploreRef} variant="primary" size="lg" onClick={go} className="shadow-md">

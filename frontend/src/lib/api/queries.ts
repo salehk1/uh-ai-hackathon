@@ -9,10 +9,12 @@ import {
   homeSchema,
   mapResponseSchema,
   predictResponseSchema,
+  reportSchema,
   searchResponseSchema,
   statsSchema,
   type MapMetric,
   type PredictRequest,
+  type ReportRequest,
   type SearchRequest,
 } from "./schemas";
 
@@ -40,6 +42,7 @@ export const keys = {
   map: (metric: MapMetric, zip?: string) => ["map", metric, zip ?? null] as const,
   compare: (zips: string[]) => ["compare", [...zips].sort().join(",")] as const,
   stats: ["stats"] as const,
+  report: (r: ReportRequest) => ["report", r.zpid ?? null, r.address?.toLowerCase() ?? null, r.asking_price ?? null] as const,
 };
 
 export function useSource() {
@@ -70,6 +73,25 @@ export function useHome(zpid: number | null) {
     ...homeQuery(zpid ?? 0),
     enabled: zpid !== null && Number.isInteger(zpid) && zpid > 0,
     retry: (n, e) => n < 1 && !(e as { status?: number }).status?.toString().startsWith("4"),
+  });
+}
+
+const noRetryOn4xx = (n: number, e: unknown) => n < 1 && !(e as { status?: number }).status?.toString().startsWith("4");
+
+/**
+ * POST /report: the whole due-diligence report in one call. `asking_price` (a "what if I offer"
+ * value) is part of the key, and the previous report stays on screen while a new offer loads.
+ */
+export function useReport(r: ReportRequest | null) {
+  return useQuery({
+    queryKey: keys.report(r ?? {}),
+    queryFn: ({ signal }) => apiFetch("/api/report", reportSchema, { signal, json: r }),
+    enabled: r !== null,
+    staleTime: 5 * 60_000,
+    placeholderData: (prev, prevQuery) =>
+      // keep the old report only while changing the offer on the same listing
+      prevQuery && prevQuery.queryKey[1] === (r?.zpid ?? null) && r?.zpid !== undefined ? prev : undefined,
+    retry: noRetryOn4xx,
   });
 }
 

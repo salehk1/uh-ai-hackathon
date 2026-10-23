@@ -10,9 +10,10 @@ import { useAnalyst, type Message } from "./analyst-context";
 import { VisualView } from "./visuals";
 
 const GENERAL_PROMPTS = [
-  "Compare 77002, 77019 and 77494 on price per sqft. Which has more listings above their range?",
-  "Find 3+ bedroom homes under $400K within 10 km of downtown that are below their estimated range.",
-  "How accurate is the model, and how was it validated?",
+  "Report for 932 Bennington St",
+  "Low-priced 3-beds under $350k near the Med Center",
+  "Compare 77019 and 77002",
+  "How accurate is the model?",
 ];
 
 export function AnalystSheet() {
@@ -59,9 +60,9 @@ export function AnalystSheet() {
 
   const prompts = a.contextZpid
     ? [
+        `Report for listing ${a.contextZpid}`,
         `Explain the price receipt for listing ${a.contextZpid}.`,
         `How does listing ${a.contextZpid} compare with other homes in its ZIP code?`,
-        ...GENERAL_PROMPTS.slice(0, 1),
       ]
     : GENERAL_PROMPTS;
 
@@ -236,6 +237,11 @@ function MessageView({ m }: { m: Message }) {
       {m.visuals.map((v, i) => (
         <VisualView key={i} v={v} />
       ))}
+      {m.toolCalls.length > 0 && (
+        <p className="px-1 text-[11.5px] text-ink-3">
+          Tools used: {[...new Set(m.toolCalls.map((t) => t.tool))].join(", ")}
+        </p>
+      )}
       {(m.toolCalls.length > 0 || m.mode) && (
         <details className="group rounded-xl px-1 text-[11.5px] text-ink-3">
           <summary className="cursor-pointer select-none rounded-md py-1 hover:text-ink">

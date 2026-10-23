@@ -12,18 +12,21 @@ export const C = {
   slate: "#4f6d8a",
   slateSoft: "#e3eaf1",
   neutral: "#b8b3a4",
+  vLow: "#3a6ea5",
+  vExpected: "#9a9d96",
+  vHigh: "#b8483b",
 } as const;
 
 /** Verdict colors. Always paired with text/icons; never the only cue. */
-export const VERDICT_COLOR = { high: C.ochre, low: C.slate, expected: C.sage } as const;
+export const VERDICT_COLOR = { high: C.vHigh, low: C.vLow, expected: C.vExpected } as const;
 
-/** Diverging stops for residual_pct (fraction): below estimate → slate, near → sage-grey, above → ochre. */
+/** Diverging stops for residual_pct (fraction): below estimate → blue, near → grey, above → red. */
 export const RESIDUAL_STOPS: [number, string][] = [
-  [-0.3, "#3f5f7e"],
-  [-0.12, "#7f9bb4"],
-  [0, "#c9cfc2"],
-  [0.12, "#d3a865"],
-  [0.3, "#9c6a22"],
+  [-0.3, "#2b5689"],
+  [-0.12, "#7fa3cb"],
+  [0, "#c9cac4"],
+  [0.12, "#d98f83"],
+  [0.3, "#93342a"],
 ];
 
 /** Sequential stops for asking $/sqft. */

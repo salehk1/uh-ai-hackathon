@@ -19,8 +19,16 @@ const BAR: Record<WaterfallStep["kind"] | "neg", string> = {
  * Waterfall: baseline from $0, each item from the running total, ML adjustment, then the estimate.
  * One coordinated reveal; values stay readable throughout (no counting animations).
  */
-export function ReceiptWaterfall({ receipt, compact = false }: { receipt: Receipt; compact?: boolean }) {
-  const steps = waterfall(receipt);
+export function ReceiptWaterfall({
+  receipt,
+  compact = false,
+  totalLabel = "Model estimate",
+}: {
+  receipt: Receipt;
+  compact?: boolean;
+  totalLabel?: string;
+}) {
+  const steps = waterfall(receipt, totalLabel);
   const lo = Math.min(0, ...steps.map((s) => Math.min(s.start, s.end)));
   const hi = Math.max(...steps.map((s) => Math.max(s.start, s.end))) * 1.02;
   const span = hi - lo || 1;
@@ -79,7 +87,7 @@ export function ReceiptWaterfall({ receipt, compact = false }: { receipt: Receip
           <Legend className="bg-forest" label="Adds to price" />
           <Legend className="bg-ochre" label="Reduces price" />
           <Legend className={BAR.adjustment} label="ML adjustment" />
-          <Legend className="bg-ink" label="Model estimate" />
+          <Legend className="bg-ink" label={totalLabel} />
         </figcaption>
       )}
     </figure>
@@ -96,7 +104,15 @@ function Legend({ className, label }: { className: string; label: string }) {
 }
 
 /** The readable, accessible version of the receipt. Every number in the chart is here. */
-export function ReceiptTable({ receipt, compact = false }: { receipt: Receipt; compact?: boolean }) {
+export function ReceiptTable({
+  receipt,
+  compact = false,
+  totalLabel = "Model estimate",
+}: {
+  receipt: Receipt;
+  compact?: boolean;
+  totalLabel?: string;
+}) {
   const running = receipt.items.reduce<number[]>((acc, it) => [...acc, (acc.at(-1) ?? 0) + it.usd], []);
   const sum = itemSum(receipt.items);
   const ok = reconciles(receipt);
@@ -134,7 +150,7 @@ export function ReceiptTable({ receipt, compact = false }: { receipt: Receipt; c
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-ink/80">
-            <th scope="row" className="pt-2.5 pr-3 font-semibold text-ink">Model estimate</th>
+            <th scope="row" className="pt-2.5 pr-3 font-semibold text-ink">{totalLabel}</th>
             <td className="whitespace-nowrap pt-2.5 pr-3 text-right font-semibold text-ink">{usd(receipt.total)}</td>
             {!compact && <td className="hidden sm:table-cell" />}
           </tr>
@@ -143,7 +159,7 @@ export function ReceiptTable({ receipt, compact = false }: { receipt: Receipt; c
       <p className={clsx("mt-3 flex items-start gap-1.5 text-xs", ok ? "text-ink-3" : "text-danger")}>
         {ok ? <CircleCheck className="mt-px size-3.5 shrink-0 text-forest" aria-hidden /> : <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden />}
         {ok
-          ? `Line items sum to ${usd(sum)}, matching the estimate. GWR subtotal before the ML adjustment: ${usd(receipt.gwr_price)}.`
+          ? `Line items sum to ${usd(sum)}, matching the ${totalLabel.toLowerCase()}. GWR subtotal before the ML adjustment: ${usd(receipt.gwr_price)}.`
           : `Line items sum to ${usd(sum)} but the stated total is ${usd(receipt.total)}. Shown as received; please report this listing.`}
       </p>
     </div>

@@ -2,7 +2,7 @@
 
 /*
  * Design tokens: warm off-white canvas, white surfaces, muted forest/sage, charcoal ink.
- * Ochre marks "above range" and caution; slate marks "below range". Sparingly.
+ * Verdicts: blue = below range, grey = within, red = above. Ochre marks caution/fixtures.
  * Contrast: ink-3 on canvas ≈ 4.8:1, forest on white ≈ 7.4:1, ochre-ink on white ≈ 5.6:1.
  */
 :root {
@@ -26,6 +26,16 @@
   --slate: #4f6d8a;
   --slate-ink: #3c5872;
   --slate-soft: #e3eaf1;
+  /* Verdict colors (team rule): low = blue, expected = neutral grey, high = red. Always with text + icon. */
+  --v-low: #3a6ea5;
+  --v-low-ink: #2b5689;
+  --v-low-soft: #e2ebf6;
+  --v-expected: #8b8f88;
+  --v-expected-ink: #4b514c;
+  --v-expected-soft: #eeede7;
+  --v-high: #b8483b;
+  --v-high-ink: #93342a;
+  --v-high-soft: #f8e4e0;
   --danger: #a3452f;
   --danger-soft: #f7e4dd;
   --shadow-sm: 0 1px 2px rgb(40 36 24 / 0.06);
@@ -54,6 +64,15 @@
   --color-slate: var(--slate);
   --color-slate-ink: var(--slate-ink);
   --color-slate-soft: var(--slate-soft);
+  --color-v-low: var(--v-low);
+  --color-v-low-ink: var(--v-low-ink);
+  --color-v-low-soft: var(--v-low-soft);
+  --color-v-expected: var(--v-expected);
+  --color-v-expected-ink: var(--v-expected-ink);
+  --color-v-expected-soft: var(--v-expected-soft);
+  --color-v-high: var(--v-high);
+  --color-v-high-ink: var(--v-high-ink);
+  --color-v-high-soft: var(--v-high-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
@@ -132,4 +151,37 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
   border-radius: 10px;
+}
+
+/* Comps mini-map markers (report page). The outer element is MapLibre's; style the inner span. */
+.comp-pin {
+  text-decoration: none;
+}
+.comp-pin > span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: #fff;
+  font: 700 11px/1 var(--font-sans);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+  transition: transform 120ms ease-out, background-color 120ms;
+}
+.comp-pin:hover,
+.comp-pin.is-active {
+  z-index: 2;
+}
+.comp-pin:hover > span,
+.comp-pin.is-active > span {
+  transform: scale(1.25);
+  background: var(--forest-2);
+}
+.comp-pin-home > span {
+  width: 28px;
+  height: 28px;
+  background: var(--ink);
+  font-size: 13px;
 }

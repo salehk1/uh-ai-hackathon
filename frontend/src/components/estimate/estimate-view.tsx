@@ -42,6 +42,7 @@ type Form = {
   new_construction: boolean;
   no_flood: boolean;
   garage: boolean;
+  description: string;
   asking: string;
 };
 
@@ -61,6 +62,7 @@ const INITIAL: Form = {
   new_construction: false,
   no_flood: false,
   garage: true,
+  description: "",
   asking: "",
 };
 
@@ -83,6 +85,7 @@ function toRequest(f: Form): { req?: PredictRequest; errors: Record<string, stri
     new_construction: f.new_construction,
     no_flood: f.no_flood,
     garage: f.garage,
+    description: f.description.trim() || undefined,
   };
   const errors: Record<string, string> = {};
   for (const k of ["living_area", "beds", "baths", "year_built", "lat", "lon"] as const) {
@@ -253,6 +256,24 @@ export function EstimateView() {
                 <Check label={'"Never flooded" in listing'} checked={f.no_flood} onChange={(v) => set("no_flood", v)} />
               </div>
               <p className="mt-2 text-xs text-ink-3">These flags mirror phrases detected in listing descriptions; they aren&apos;t verified records.</p>
+              <Field
+                label="Listing description"
+                htmlFor="e-desc"
+                error={errors.description}
+                hint="The model reads this text, so details like “renovated with pool” change the estimate."
+                className="mt-4"
+              >
+                <textarea
+                  id="e-desc"
+                  value={f.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  rows={3}
+                  maxLength={4000}
+                  placeholder="e.g. Fully renovated 3-bed with new kitchen, pool and covered patio."
+                  className={clsx(inputClass, "h-auto resize-y py-2 leading-relaxed")}
+                  aria-invalid={errors.description ? true : undefined}
+                />
+              </Field>
             </fieldset>
 
             <fieldset>

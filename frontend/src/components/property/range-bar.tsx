@@ -57,7 +57,7 @@ export function RangeBar({
           <motion.div
             className={clsx(
               "absolute top-1/2 z-20 size-4.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-surface shadow-md",
-              outside ? (asking > q90 ? "bg-ochre" : "bg-slate") : "bg-ink",
+              outside ? (asking > q90 ? "bg-v-high" : "bg-v-low") : "bg-ink",
             )}
             style={{ left: `${pct(asking)}%` }}
             initial={{ opacity: 0, scale: 0.6 }}

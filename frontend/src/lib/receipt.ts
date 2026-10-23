@@ -44,7 +44,7 @@ export type WaterfallStep = {
 };
 
 /** Running totals for a waterfall: baseline bar from 0, each item from the running sum, then the total. */
-export function waterfall(r: Receipt): WaterfallStep[] {
+export function waterfall(r: Receipt, totalLabel = "Model estimate"): WaterfallStep[] {
   let running = 0;
   const steps: WaterfallStep[] = r.items.map((it, i) => {
     const start = it.feature === "baseline" ? 0 : running;
@@ -59,7 +59,7 @@ export function waterfall(r: Receipt): WaterfallStep[] {
       end,
     };
   });
-  steps.push({ key: "total", label: "Model estimate", kind: "total", usd: r.total, start: 0, end: r.total });
+  steps.push({ key: "total", label: totalLabel, kind: "total", usd: r.total, start: 0, end: r.total });
   return steps;
 }
 

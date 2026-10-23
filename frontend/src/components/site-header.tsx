@@ -12,7 +12,7 @@ export const NAV = [
   { href: "/explore", label: "Explore" },
   { href: "/compare", label: "Compare ZIPs" },
   { href: "/estimate", label: "Estimate a home" },
-  { href: "/methodology", label: "Methodology" },
+  { href: "/methodology", label: "How it works" },
 ] as const;
 
 export function SiteHeader() {
@@ -22,9 +22,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-canvas/85 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
-        <Link href="/explore" className="flex shrink-0 items-center gap-2 rounded-lg pr-2 text-ink" aria-label="Houston Price Receipt home">
+        <Link href="/explore" className="flex shrink-0 items-center gap-2 rounded-lg pr-2 text-ink" aria-label="QuantHouse home">
           <Logo className="size-7" />
-          <span className="hidden text-[15px] font-semibold tracking-tight sm:inline">Houston Price Receipt</span>
+          <span className="hidden text-[15px] font-semibold tracking-tight sm:inline">QuantHouse</span>
         </Link>
         <nav aria-label="Primary" className="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none]">
           {NAV.map((n) => {

@@ -1,5 +1,5 @@
 /**
- * Runtime contracts for the FastAPI backend (api/main.py at commit 2dc86a1).
+ * Runtime contracts for the FastAPI backend (api/main.py on `backend`; /report per docs/REPORT_SCHEMA.json).
  * Response schemas validate what the browser receives; request schemas are shared by
  * the UI forms and the Next.js adapter so only known, sane fields are forwarded.
  */
@@ -180,7 +180,8 @@ export const statsSchema = z
         coverage_calibrated: nullableNum.optional(),
         coverage_calibrated_by_home_type: z.record(z.string(), nullableNum).optional(),
         calibration: z.string().optional(),
-        final_widening_log: nullableNum.optional(),
+        coverage_raw_by_home_type: z.record(z.string(), nullableNum).optional(),
+        final_widening_log: z.unknown().optional(), // number (older model) or { home_type: log widening }
         median_width_pct: nullableNum.optional(),
         verdict_counts: z.record(z.string(), z.number()).optional(),
       })
@@ -204,10 +205,124 @@ export type Stats = z.infer<typeof statsSchema>;
 export const chatResponseSchema = z.object({
   text: z.string(),
   visuals: z.array(z.unknown()),
-  tool_calls: z.array(z.object({ tool: z.string(), args: z.record(z.string(), z.unknown()) })),
+  tool_calls: z.array(z.object({ tool: z.string(), args: z.record(z.string(), z.unknown()).default({}) })),
   mode: z.string(),
 });
 export type ChatResponse = z.infer<typeof chatResponseSchema>;
+
+// ---------------------------------------------------------------- /report (due-diligence report)
+/** Several fields are the literal string "unknown" instead of a number. That is an answer, not a gap. */
+export const UNKNOWN = "unknown" as const;
+const orUnknown = z.union([num, z.literal(UNKNOWN)]);
+export type OrUnknown = z.infer<typeof orUnknown>;
+
+export const REPORT_VERDICTS = ["high", "expected", "low", "unknown"] as const;
+export type ReportVerdict = (typeof REPORT_VERDICTS)[number];
+
+const optNum = num.nullish();
+const optStr = z.string().nullish();
+
+export const reportListingSchema = z
+  .object({
+    zpid: z.number().int(),
+    street_address: optStr,
+    city: optStr,
+    state: optStr,
+    zipcode: optStr,
+    home_type: optStr,
+    beds: optNum,
+    baths: optNum,
+    living_area: optNum,
+    year_built: optNum,
+    lot_acres: optNum,
+    lat: optNum,
+    lon: optNum,
+    days_on_zillow: optNum,
+    page_views: optNum,
+    favorites: optNum,
+    agent_name: optStr,
+    broker_name: optStr,
+    mls_id: optStr,
+    photo_count: optNum,
+    date_posted: optStr,
+    hdp_url: optStr,
+    list_price: optNum,
+  })
+  .passthrough();
+export type ReportListing = z.infer<typeof reportListingSchema>;
+
+export const reportReceiptItemSchema = z.object({
+  feature: z.string(),
+  label: z.string().optional(),
+  usd: num,
+  pct: num,
+});
+
+export const compSchema = z.object({
+  zpid: z.number().int(),
+  price: num,
+  ppsf: num,
+  dist_km: num,
+  beds: nullableNum,
+  baths: nullableNum,
+  sqft: num,
+  home_type: z.string().optional(),
+  lat: num.optional(),
+  lon: num.optional(),
+});
+export type Comp = z.infer<typeof compSchema>;
+
+export const SIGNAL_NAMES = [
+  "asking_far_below_range",
+  "duplicate_photos",
+  "duplicate_description",
+  "agent_broker_attribution",
+  "size_vs_comps",
+  "engagement_anomaly",
+  "address_disclosure",
+] as const;
+
+export const signalSchema = z.object({
+  name: z.string(), // known names in SIGNAL_NAMES; unknown names still render with their raw id
+  status: z.enum(["ok", "warning", "unknown"]),
+  evidence: z.string(),
+  related_zpids: z.array(z.number().int()).optional(),
+});
+export type Signal = z.infer<typeof signalSchema>;
+export type SignalStatus = Signal["status"];
+
+export const reportSchema = z.object({
+  listing: reportListingSchema,
+  price: z.object({
+    asking: num,
+    fair: orUnknown,
+    q10: orUnknown,
+    q90: orUnknown,
+    verdict: z.enum(REPORT_VERDICTS),
+    asking_vs_fair_pct: num.optional(), // already a percentage (-47.6 = 47.6% below)
+    range_coverage: num.optional(), // fraction, a property of the model
+    reason: z.string().optional(),
+    receipt: z.array(reportReceiptItemSchema),
+    comps: z.array(compSchema).max(8),
+    comps_rule: z.string().nullish(),
+  }),
+  verification: z.object({ signals: z.array(signalSchema) }),
+  costs: z.object({
+    monthly: z.object({
+      mortgage: num,
+      tax: orUnknown,
+      hoa: orUnknown,
+      insurance: orUnknown,
+      total_known: num,
+    }),
+    assumptions: z.array(z.string()).default([]),
+    unknowns: z.array(z.string()).default([]),
+  }),
+  sources: z.array(z.object({ name: z.string(), detail: z.string().optional(), license: z.string().optional() })),
+  limitations: z.array(z.string()),
+  address_matches: z.array(z.object({ zpid: z.number().int(), address: z.string() })).optional(),
+});
+export type Report = z.infer<typeof reportSchema>;
 
 // ---------------------------------------------------------------- requests (UI + adapter)
 const zip = z.string().regex(/^\d{5}$/, "ZIP codes have five digits");
@@ -259,6 +374,16 @@ export const predictRequestSchema = z
   })
   .strict();
 export type PredictRequest = z.infer<typeof predictRequestSchema>;
+
+export const reportRequestSchema = z
+  .object({
+    zpid: z.number().int().positive().optional(),
+    address: z.string().trim().min(3, "Enter a street address").max(200).optional(),
+    asking_price: num.positive("Offer must be positive").max(100_000_000).optional(),
+  })
+  .strict()
+  .refine((r) => r.zpid !== undefined || r.address !== undefined, { message: "Enter an address or zpid", path: ["address"] });
+export type ReportRequest = z.infer<typeof reportRequestSchema>;
 
 export const compareRequestSchema = z.array(zip).min(1).max(8);
 

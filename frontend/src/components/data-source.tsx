@@ -2,11 +2,19 @@
 
 import { FlaskConical, PlugZap } from "lucide-react";
 import { useHealth, useSource } from "@/lib/api/queries";
+import { useBrowserValue } from "@/lib/use-browser-value";
+
+/**
+ * The source is fetched in the browser, and a query cache that already holds it would render
+ * differently from the server HTML. Render nothing until hydration is done.
+ */
+const useHydrated = () => useBrowserValue(() => true, false);
 
 /** Persistent notice whenever the app is NOT showing live backend data. */
 export function DataSourceBanner() {
   const { data } = useSource();
-  if (!data || data.mode === "live") return null;
+  const hydrated = useHydrated();
+  if (!hydrated || !data || data.mode === "live") return null;
   if (data.mode === "fixtures") {
     return (
       <div role="status" className="border-b border-ochre/30 bg-ochre-soft text-[13px] text-ink">
@@ -40,7 +48,8 @@ export function DataSourceBanner() {
 export function DataSourcePill() {
   const { data } = useSource();
   const health = useHealth();
-  if (!data) return null;
+  const hydrated = useHydrated();
+  if (!hydrated || !data) return null;
   if (data.mode === "fixtures")
     return (
       <span className="hidden shrink-0 items-center gap-1 rounded-full border border-ochre/30 bg-ochre-soft px-2.5 py-1 text-[11.5px] font-semibold text-ochre-ink sm:inline-flex">

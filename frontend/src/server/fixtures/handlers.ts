@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { CompareRow, PredictRequest, SearchRequest } from "@/lib/api/schemas";
 import { FIXTURE_ZIPS, fixtureHomes, haversineKm, synthReceipt } from "./dataset";
+import { report } from "./report";
 
 export type FixtureResult = { status: number; body: unknown };
 
@@ -129,7 +130,9 @@ export function predict(p: PredictRequest): FixtureResult {
   if (best > 25) return err(400, "location is outside the Houston coverage area");
   const zip = FIXTURE_ZIPS.find((z) => z.zip === nearest.zipcode)!;
   const typeAdj = p.home_type === "CONDO" ? 0.9 : p.home_type === "TOWNHOUSE" ? 0.97 : 1;
-  const flags = 1 + (p.pool ? 0.03 : 0) + (p.renovated ? 0.04 : 0) + (p.new_construction ? 0.05 : 0) - (p.monthly_hoa ?? 0) / 20000;
+  const text = p.description?.toLowerCase() ?? "";
+  const textAdj = (/renovat|remodel|updated/.test(text) ? 0.03 : 0) + (/pool/.test(text) ? 0.02 : 0) - (/as[- ]is|investor|tlc/.test(text) ? 0.05 : 0);
+  const flags = 1 + (p.pool ? 0.03 : 0) + (p.renovated ? 0.04 : 0) + (p.new_construction ? 0.05 : 0) - (p.monthly_hoa ?? 0) / 20000 + textAdj;
   const age = Math.max(0, 2024 - p.year_built);
   const pred = Math.round(p.living_area * zip.ppsf * typeAdj * flags * Math.exp(-age / 400));
   const rand = (() => {
@@ -157,9 +160,12 @@ export function predict(p: PredictRequest): FixtureResult {
   });
 }
 
-/** The committed results/*.json files are real recorded evaluation output, read as the backend does. */
+/**
+ * Real recorded evaluation output, read as the backend does. `fixtures/results/` is a snapshot of
+ * results/*.json from the `backend` branch (the newer model); refresh it when those files change.
+ */
 export async function stats(): Promise<FixtureResult> {
-  const root = path.resolve(process.cwd(), "..", "results");
+  const root = path.resolve(process.cwd(), "src", "server", "fixtures", "results");
   try {
     const out = JSON.parse(await readFile(path.join(root, "metrics.json"), "utf8"));
     try {
@@ -172,7 +178,7 @@ export async function stats(): Promise<FixtureResult> {
     }
     return ok(out);
   } catch {
-    return err(500, "results/metrics.json not found next to the frontend folder");
+    return err(500, "src/server/fixtures/results/metrics.json not found");
   }
 }
 
@@ -189,10 +195,28 @@ export async function chat(message: string, signal: AbortSignal): Promise<Fixtur
   const visuals: unknown[] = [];
   const tool_calls: { tool: string; args: Record<string, unknown> }[] = [];
   const parts: string[] = ["[Fixture analyst — canned response, no language model was called.]"];
-  const zpidMatch = message.match(/\b(9\d{7})\b/);
+  const zpidMatch = message.match(/\b(9\d{7}|27866230)\b/);
   const zips = [...new Set(message.match(/\b77\d{3}\b/g) ?? [])];
+  const address = message.match(/\b\d{2,5}\s+[a-z][a-z ]*?\b(st|ave|ln|dr|ct|way|blvd|rd)\b/i)?.[0];
 
-  if (zpidMatch) {
+  if (/\breport\b/i.test(message) && (zpidMatch || address)) {
+    const args = zpidMatch ? { zpid: Number(zpidMatch[1]) } : { address: address! };
+    tool_calls.push({ tool: "report", args });
+    const r = report(args);
+    if (r.status === 200) {
+      const b = r.body as { listing: { street_address: string }; price: { asking: number; fair: number | string; verdict: string } };
+      visuals.push({ type: "report", data: r.body });
+      parts.push(
+        `Report for ${b.listing.street_address}: asking $${b.price.asking.toLocaleString("en-US")}, fair price ${typeof b.price.fair === "number" ? `$${b.price.fair.toLocaleString("en-US")}` : "unknown"} (verdict: ${b.price.verdict}). Listing checks and monthly costs are in the card; they're separate questions from the price.`,
+      );
+    } else parts.push("No listing matched that address or id in the fixture data.");
+  } else if (/accura|validat|leaderboard|mape/i.test(message)) {
+    const st = (await stats()).body as { leaderboard?: Record<string, { MAPE_zestimate_rows?: number }> };
+    const b = st.leaderboard ?? {};
+    tool_calls.push({ tool: "stats", args: {} });
+    visuals.push({ type: "bar", data: { labels: Object.keys(b), series: [{ name: "MAPE %", values: Object.values(b).map((v) => v.MAPE_zestimate_rows ?? null) }] } });
+    parts.push("These are the recorded evaluation results (5-fold spatial block CV). Lower MAPE is better. The Zestimate row is Zillow's own estimate, shown as a reference point; it was not produced under the same cross-validation.");
+  } else if (zpidMatch) {
     const h = fixtureHomes().find((x) => x.zpid === Number(zpidMatch[1]));
     tool_calls.push({ tool: "get_home", args: { zpid: Number(zpidMatch[1]) } });
     if (h?.contributions) {

@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Info } from "lucide-react";
+import type { Report } from "@/lib/api/schemas";
 import type { ChatVisual, MapPoint } from "@/lib/chat";
 import { usd, usdCompact } from "@/lib/format";
+import { isKnown, signalLabel, warnings } from "@/lib/report";
+import { StatusChip, UnknownValue } from "../report/primitives";
 import { VERDICT_COLOR, C } from "@/lib/palette";
 import { ReceiptTable, ReceiptWaterfall } from "../receipt/receipt";
 import { VerdictBadge } from "../verdict-badge";
@@ -35,6 +38,8 @@ export function VisualView({ v }: { v: ChatVisual }) {
           </details>
         </figure>
       );
+    case "report":
+      return <ReportCard report={v.report} />;
     case "unsupported":
       return (
         <p className="flex items-center gap-2 rounded-xl border border-dashed border-line-strong px-3 py-2 text-[12px] text-ink-3">
@@ -130,6 +135,73 @@ function BarVisual({ labels, series }: { labels: string[]; series: { name: strin
           </div>
         );
       })}
+    </figure>
+  );
+}
+
+/** Compact summary of a /report result. The three answers stay separate; the full report is one click away. */
+function ReportCard({ report: r }: { report: Report }) {
+  const l = r.listing;
+  const p = r.price;
+  const warn = warnings(r.verification.signals);
+  const m = r.costs.monthly;
+  const unknownCosts = (["tax", "hoa", "insurance"] as const).filter((k) => !isKnown(m[k])).map((k) => ({ tax: "Tax", hoa: "HOA", insurance: "Insurance" })[k]);
+  return (
+    <figure className="rounded-2xl border border-line bg-surface p-3.5 shadow-sm">
+      <figcaption className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-[13.5px] font-semibold text-ink">{l.street_address ?? `Listing ${l.zpid}`}</p>
+          <p className="text-[11.5px] text-ink-3">
+            {[l.city, l.zipcode].filter(Boolean).join(" ")} · Listing {l.zpid}
+          </p>
+        </div>
+        <Link
+          href={`/property/${l.zpid}`}
+          className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-forest px-2.5 py-1 text-[11.5px] font-medium text-white hover:bg-forest-2"
+        >
+          Full report <ArrowUpRight className="size-3" aria-hidden />
+        </Link>
+      </figcaption>
+      <dl className="mt-3 divide-y divide-line text-[12.5px]">
+        <div className="flex items-center justify-between gap-3 py-2">
+          <dt className="text-ink-3">Price</dt>
+          <dd className="tabular flex flex-wrap items-center justify-end gap-2 text-right text-ink">
+            <span>
+              {usdCompact(p.asking)} vs fair {isKnown(p.fair) ? usdCompact(p.fair) : "unknown"}
+            </span>
+            <VerdictBadge label={p.verdict} size="sm" />
+          </dd>
+        </div>
+        <div className="flex items-start justify-between gap-3 py-2">
+          <dt className="pt-0.5 text-ink-3">Listing checks</dt>
+          <dd className="text-right">
+            {warn.length ? (
+              <ul className="space-y-1">
+                {warn.map((s) => (
+                  <li key={s.name} className="flex items-center justify-end gap-1.5 text-ink">
+                    {signalLabel(s.name)} <StatusChip status="warning" size="sm" />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-ink-2">
+                No warnings <StatusChip status="ok" size="sm" />
+              </span>
+            )}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-3 py-2">
+          <dt className="text-ink-3">Monthly (known items)</dt>
+          <dd className="tabular text-right">
+            <span className="font-semibold text-ink">{usd(m.total_known)}/mo</span>
+            {unknownCosts.length > 0 && (
+              <span className="mt-1 flex items-center justify-end gap-1.5 text-[11.5px] text-ink-3">
+                {unknownCosts.join(", ")} <UnknownValue reason="Not included in the known total; see the full report." />
+              </span>
+            )}
+          </dd>
+        </div>
+      </dl>
     </figure>
   );
 }
