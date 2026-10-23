@@ -229,7 +229,7 @@ def build(d, home, asking_override, ref, tree, xy_fn, median_rate):
     limitations = [
         "Asking prices only; no closed-sale prices. 'Fair' means consistent with comparable listings.",
         "One snapshot (June 2024); no market trend adjustment.",
-        "The 80% range is calibrated on average across Houston; individual neighborhoods may be wider or narrower.",
+        "The 80% range is calibrated per home type across Houston; individual neighborhoods may be covered more or less often.",
         "Verification signals are evidence for a human to check, not a fraud score.",
         "No inspection, title, flood-zone, or permit data.",
     ]

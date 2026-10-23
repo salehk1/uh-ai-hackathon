@@ -1,6 +1,6 @@
 """Step 2: training improvements, each scored as a leaderboard row under the same spatial block CV.
 
-Usage: python experiments.py [--stages ablation,text,optuna,combined,breakdown,curve] [--trials 40] [--tag ""]
+Usage: python experiments.py [--stages ablation,text,optuna,final,breakdown,curve] [--trials 40] [--tag ""]
 Rows accumulate in results/experiments.json (train.py merges them into metrics.json);
 the winning LightGBM config goes to results/best_config.json.
 """
@@ -20,7 +20,7 @@ import spatial as sp  # noqa: E402
 from train import BASE_COLS, LGB_PARAMS, LGB_ROUNDS, board_row, cv_lgb, load_emb, pca_extra  # noqa: E402
 
 INK, MUTED, GRID, SURFACE, BLUE = "#1f1f1e", "#6b6a66", "#e6e5e1", "#fcfcfb", "#2a78d6"
-STAGES = ["ablation", "text", "optuna", "combined", "breakdown", "curve"]
+STAGES = ["ablation", "text", "optuna", "final", "breakdown", "curve"]
 
 
 class Ctx:
@@ -107,24 +107,31 @@ def stage_optuna(c, trials):
     np.save(f"data/oof_tuned{c.tag}.npy", p)
 
 
-def stage_combined(c):
-    """Pick the published config: tuned params if they helped, text embeddings if they helped."""
-    rows, base = c.state["rows"], c.mape(base_pred(c))
-    tuned = c.state["notes"].get("optuna", {}).get("best_params")
-    params = {**LGB_PARAMS, **(tuned or {})}
-    text_lift = rows.get("LightGBM + MiniLM text (PCA 16)", {}).get("delta_MAPE_vs_full", 0)
-    use_text = text_lift < 0
-    p = cv_lgb(c.X(), c.y, c.xy, c.folds, params, extra=pca_extra(load_emb(c.df, c.tag)) if use_text else None)
-    name = "LightGBM tuned" + (" + text" if use_text else "")
-    if name != "LightGBM tuned":
-        c.row(name, p, delta_MAPE_vs_full=round(c.mape(p) - base, 2))
+def stage_final(c):
+    """Choose the published config from tuned params x {text on/off} x {spatial lag on/off}."""
+    base = c.mape(base_pred(c))
+    tuned = c.state["notes"].get("optuna", {}).get("best_params", {})
+    params = {**LGB_PARAMS, **tuned}
+    emb = load_emb(c.df, c.tag)
+    tuned_name = next((k for k in c.state["rows"] if k.startswith("LightGBM tuned (Optuna")), None)
+    cands = {}
+    for text in (False, True):
+        for lag in (True, False):
+            name = "LightGBM tuned" + (" + text" if text else "") + ("" if lag else " − spatial lag")
+            if not text and lag and tuned_name:
+                cands[(text, lag)] = c.state["rows"][tuned_name]["MAPE"]
+                continue
+            p = cv_lgb(c.X(), c.y, c.xy, c.folds, params, use_lag=lag, extra=pca_extra(emb) if text else None)
+            r = c.row(name, p, delta_MAPE_vs_full=round(c.mape(p) - base, 2))
+            cands[(text, lag)] = r["MAPE"]
+            np.save(f"data/oof_{int(text)}{int(lag)}{c.tag}.npy", p)
+    (text, lag), best = min(cands.items(), key=lambda kv: kv[1])
     chosen = {"params": {k: params[k] for k in ("num_leaves", "learning_rate", "min_child_samples", "feature_fraction")},
-              "rounds": LGB_ROUNDS, "text_emb": bool(use_text)}
-    if c.mape(p) >= base:  # nothing beat the defaults: keep them
-        chosen = {"params": {}, "rounds": LGB_ROUNDS, "text_emb": False}
-    chosen["chosen_MAPE"] = round(min(c.mape(p), base), 3)
+              "rounds": LGB_ROUNDS, "text_emb": text, "use_lag": lag, "chosen_MAPE": best, "default_MAPE": round(base, 3),
+              "candidates": {f"text={t}, lag={l}": v for (t, l), v in cands.items()}}
     Path("results/best_config.json").write_text(json.dumps(chosen, indent=2))
-    np.save(f"data/oof_best{c.tag}.npy", p if c.mape(p) < base else base_pred(c))
+    f = Path(f"data/oof_{int(text)}{int(lag)}{c.tag}.npy")
+    np.save(f"data/oof_best{c.tag}.npy", np.load(f) if f.exists() else np.load(f"data/oof_tuned{c.tag}.npy"))
     print("  best config:", chosen)
 
 
@@ -158,13 +165,14 @@ def stage_breakdown(c):
     a1.set_xlim(0, by_type.MAPE.max() * 1.6)
     a1.xaxis.grid(True, color=GRID, linewidth=0.8)
     a1.set_title("MAPE by home type", loc="left", fontsize=10, color=INK)
-    labels = [f"D{i}\n${lo / 1e3:,.0f}–{hi / 1e3:,.0f}k" for i, lo, hi in zip(by_dec.index, by_dec.lo, by_dec.hi)]
+    labels = [f"D{i}\n${lo / 1e3:,.0f}k+" if i == 10 else f"D{i}\n{lo / 1e3:,.0f}–{hi / 1e3:,.0f}k"
+              for i, lo, hi in zip(by_dec.index, by_dec.lo, by_dec.hi)]
     bars = a2.bar(labels, by_dec.MAPE, color=BLUE, width=0.6)
     for b, v in zip(bars, by_dec.MAPE):
         a2.text(b.get_x() + b.get_width() / 2, v + 0.3, f"{v:.1f}%", ha="center", fontsize=8, color=INK)
     a2.yaxis.grid(True, color=GRID, linewidth=0.8)
     a2.tick_params(axis="x", labelsize=6.5)
-    a2.set_title("MAPE by list-price decile", loc="left", fontsize=10, color=INK)
+    a2.set_title("MAPE by list-price decile ($)", loc="left", fontsize=10, color=INK)
     a2.set_ylabel("MAPE (%)", color=MUTED, fontsize=8)
     fig.suptitle("Where the fair-price model errs (out-of-fold, spatial block CV)", x=0.01, ha="left", fontsize=11, color=INK)
     fig.tight_layout()
@@ -176,10 +184,11 @@ def stage_curve(c):
     cfg = json.loads(Path("results/best_config.json").read_text()) if Path("results/best_config.json").exists() else {}
     params = {**LGB_PARAMS, **cfg.get("params", {})}
     extra = pca_extra(load_emb(c.df, c.tag)) if cfg.get("text_emb") else None
+    use_lag = cfg.get("use_lag", True)
     fracs = [0.1, 0.25, 0.5, 0.75, 1.0]
     pts = []
     for fr in fracs:
-        m = c.mape(cv_lgb(c.X(), c.y, c.xy, c.folds, params, extra=extra, train_frac=fr))
+        m = c.mape(cv_lgb(c.X(), c.y, c.xy, c.folds, params, use_lag=use_lag, extra=extra, train_frac=fr))
         n_train = int(np.mean([(c.folds != f).sum() for f in range(5)]) * fr)
         pts.append({"train_frac": fr, "n_train": n_train, "MAPE": round(m, 3)})
         print(f"  frac {fr:.2f} (n≈{n_train:,}): MAPE {m:.2f}", flush=True)

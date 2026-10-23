@@ -1,0 +1,19 @@
+{
+  "params": {
+    "num_leaves": 134,
+    "learning_rate": 0.018754471887690163,
+    "min_child_samples": 38,
+    "feature_fraction": 0.5427014266560239
+  },
+  "rounds": 1200,
+  "text_emb": true,
+  "use_lag": false,
+  "chosen_MAPE": 11.07,
+  "default_MAPE": 11.652,
+  "candidates": {
+    "text=False, lag=True": 11.48,
+    "text=False, lag=False": 11.36,
+    "text=True, lag=True": 11.39,
+    "text=True, lag=False": 11.07
+  }
+}

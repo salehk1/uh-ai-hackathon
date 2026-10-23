@@ -37,7 +37,9 @@ pool = ConnectionPool(os.environ["SUPABASE_DB_URL"], min_size=1, max_size=5,
 META = json.loads((ROOT / "data/models/meta.json").read_text())
 BOOSTER = lgb.Booster(model_file=str(ROOT / "data/models/lgbm.txt"))
 QBOOST = {q: lgb.Booster(model_file=str(ROOT / f"data/models/lgbm_{q}.txt")) for q in ("q10", "q50", "q90")}
-WIDEN = float(META.get("interval_widening_log", 0.0))
+WIDEN = META.get("interval_widening_log", {})  # per home type (Mondrian calibration)
+_nq = len(META.get("quantile_features", META["lgb_features"]))
+assert all(b.num_feature() == _nq for b in QBOOST.values()), "quantile models out of sync with meta.json; rerun train.py"
 REF = pd.read_parquet(ROOT / "data/features.parquet")
 COEFS = pd.read_parquet(ROOT / "data/gwr_coefs.parquet").set_index("zpid").loc[REF.zpid]
 REF_XY = sp.xy_km(REF.latitude, REF.longitude)
@@ -141,11 +143,13 @@ def predict(p: PredictIn):
         raw[f"type_{t}"] = int(ht == t)
     for k in TEXT_FLAGS:
         raw[f"flag_{k}"] = int(getattr(p, k))
-    x = np.array([[raw[f] for f in META["lgb_features"]]], float)
+    q_feats = [f for f in META.get("quantile_features", META["lgb_features"]) if not f.startswith("text_pc")]
+    x = np.array([[raw[f] for f in q_feats]], float)
     x = np.c_[x, text_features(p.description)]
     qs = {k: float(np.clip(b.predict(x)[0], *Y_RANGE)) for k, b in QBOOST.items()}
     q50 = qs["q50"]
-    lo, hi = min(qs["q10"], q50) - WIDEN, max(qs["q90"], q50) + WIDEN
+    w = float(WIDEN.get(ht, 0.0)) if isinstance(WIDEN, dict) else float(WIDEN)
+    lo, hi = min(qs["q10"], q50) - w, max(qs["q90"], q50) + w
     price = p.living_area * np.exp(q50)
     Z, _ = sp.standardize(pd.DataFrame([raw]), META["vars"], STATS)
     betas = COEFS.iloc[nn[0]][BCOLS].to_numpy(float)  # GWR coefficients of the nearest home

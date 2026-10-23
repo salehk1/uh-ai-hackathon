@@ -2,47 +2,74 @@
   "n": 21659,
   "n_zestimate": 20392,
   "cv": "5-fold spatial block CV (2km grid)",
-  "best_model": "LightGBM q50 (published fair price)",
-  "published_model": "LightGBM q50 + calibrated q10/q90",
+  "best_model": "LightGBM tuned + text \u2212 spatial lag",
   "gwr_k": 200,
+  "published_model": "LightGBM q50 + calibrated q10/q90 + MiniLM text (no spatial lag)",
   "config": {
     "params": {
       "objective": "regression",
-      "learning_rate": 0.03,
-      "num_leaves": 63,
-      "min_child_samples": 20,
-      "feature_fraction": 0.8,
+      "learning_rate": 0.018754471887690163,
+      "num_leaves": 134,
+      "min_child_samples": 38,
+      "feature_fraction": 0.5427014266560239,
       "bagging_fraction": 0.8,
       "bagging_freq": 1,
       "lambda_l2": 1.0,
-      "verbose": -1
+      "verbose": -1,
+      "num_threads": 4
     },
     "rounds": 1200,
-    "text_emb": false
+    "text_emb": true,
+    "use_lag": false
   },
   "intervals": {
     "target": 0.8,
-    "coverage_raw_q10_q90": 0.5894,
-    "coverage_calibrated": 0.8,
+    "coverage_raw_q10_q90": 0.6042,
+    "coverage_calibrated": 0.7998,
     "coverage_calibrated_by_home_type": {
-      "SINGLE_FAMILY": 0.8121,
-      "TOWNHOUSE": 0.7492,
-      "CONDO": 0.6353
+      "SINGLE_FAMILY": 0.7997,
+      "TOWNHOUSE": 0.7998,
+      "CONDO": 0.8012
     },
-    "calibration": "cross-fold conformalized quantile regression (log ppsf)",
+    "coverage_raw_by_home_type": {
+      "SINGLE_FAMILY": 0.609,
+      "TOWNHOUSE": 0.5915,
+      "CONDO": 0.5333
+    },
+    "calibration": "cross-fold conformalized quantile regression (log ppsf), separately per home type",
     "fold_widening_log": {
-      "0": 0.0633,
-      "1": 0.065,
-      "2": 0.0643,
-      "3": 0.0632,
-      "4": 0.064
+      "CONDO": {
+        "0": 0.1385,
+        "1": 0.1386,
+        "2": 0.1597,
+        "3": 0.1539,
+        "4": 0.141
+      },
+      "SINGLE_FAMILY": {
+        "0": 0.0488,
+        "1": 0.0503,
+        "2": 0.0497,
+        "3": 0.0515,
+        "4": 0.0495
+      },
+      "TOWNHOUSE": {
+        "0": 0.0663,
+        "1": 0.0733,
+        "2": 0.0701,
+        "3": 0.0674,
+        "4": 0.0727
+      }
     },
-    "final_widening_log": 0.064,
-    "median_width_pct": 40.0,
+    "final_widening_log": {
+      "CONDO": 0.1472,
+      "SINGLE_FAMILY": 0.0498,
+      "TOWNHOUSE": 0.0701
+    },
+    "median_width_pct": 37.9,
     "verdict_counts": {
-      "expected": 17328,
-      "low": 2223,
-      "high": 2108
+      "expected": 17322,
+      "high": 2314,
+      "low": 2023
     }
   },
   "leaderboard": {
@@ -54,11 +81,11 @@
       "moran_resid_oof": 0.4554
     },
     "GWR": {
-      "MAE": 86799.0,
-      "MAPE": 15.74,
-      "R2": 0.8137,
-      "MAPE_zestimate_rows": 15.71,
-      "moran_resid_oof": 0.2078
+      "MAE": 84812.0,
+      "MAPE": 15.4,
+      "R2": 0.8197,
+      "MAPE_zestimate_rows": 15.35,
+      "moran_resid_oof": 0.1992
     },
     "LightGBM": {
       "MAE": 65698.0,
@@ -68,11 +95,75 @@
       "moran_resid_oof": 0.2324
     },
     "LightGBM q50 (published fair price)": {
-      "MAE": 66261.0,
-      "MAPE": 11.59,
-      "R2": 0.8826,
-      "MAPE_zestimate_rows": 11.55,
-      "moran_resid_oof": 0.2371
+      "MAE": 65422.0,
+      "MAPE": 11.19,
+      "R2": 0.8799,
+      "MAPE_zestimate_rows": 11.17,
+      "moran_resid_oof": 0.2635
+    },
+    "LightGBM \u2212 spatial lag": {
+      "MAE": 64449.0,
+      "MAPE": 11.36,
+      "R2": 0.883,
+      "MAPE_zestimate_rows": 11.34,
+      "moran_resid_oof": 0.2381,
+      "delta_MAPE_vs_full": -0.29
+    },
+    "LightGBM \u2212 text flags": {
+      "MAE": 66820.0,
+      "MAPE": 11.89,
+      "R2": 0.8819,
+      "MAPE_zestimate_rows": 11.86,
+      "moran_resid_oof": 0.2295,
+      "delta_MAPE_vs_full": 0.24
+    },
+    "LightGBM \u2212 schools": {
+      "MAE": 66446.0,
+      "MAPE": 11.78,
+      "R2": 0.8823,
+      "MAPE_zestimate_rows": 11.74,
+      "moran_resid_oof": 0.2331,
+      "delta_MAPE_vs_full": 0.12
+    },
+    "LightGBM + MiniLM text (PCA 16)": {
+      "MAE": 65468.0,
+      "MAPE": 11.57,
+      "R2": 0.8899,
+      "MAPE_zestimate_rows": 11.53,
+      "moran_resid_oof": 0.2283,
+      "delta_MAPE_vs_full": -0.08
+    },
+    "LightGBM tuned (Optuna, 40 trials)": {
+      "MAE": 65270.0,
+      "MAPE": 11.48,
+      "R2": 0.8803,
+      "MAPE_zestimate_rows": 11.45,
+      "moran_resid_oof": 0.2253,
+      "delta_MAPE_vs_full": -0.17
+    },
+    "LightGBM tuned \u2212 spatial lag": {
+      "MAE": 64573.0,
+      "MAPE": 11.36,
+      "R2": 0.883,
+      "MAPE_zestimate_rows": 11.33,
+      "moran_resid_oof": 0.2416,
+      "delta_MAPE_vs_full": -0.29
+    },
+    "LightGBM tuned + text": {
+      "MAE": 64924.0,
+      "MAPE": 11.39,
+      "R2": 0.885,
+      "MAPE_zestimate_rows": 11.36,
+      "moran_resid_oof": 0.2223,
+      "delta_MAPE_vs_full": -0.26
+    },
+    "LightGBM tuned + text \u2212 spatial lag": {
+      "MAE": 63327.0,
+      "MAPE": 11.07,
+      "R2": 0.8903,
+      "MAPE_zestimate_rows": 11.06,
+      "moran_resid_oof": 0.2509,
+      "delta_MAPE_vs_full": -0.58
     },
     "Zestimate (benchmark)": {
       "MAE": 17778.0,
