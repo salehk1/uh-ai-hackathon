@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens: warm off-white canvas, white surfaces, muted forest/sage, charcoal ink.
+ * Ochre marks "above range" and caution; slate marks "below range". Sparingly.
+ * Contrast: ink-3 on canvas ≈ 4.8:1, forest on white ≈ 7.4:1, ochre-ink on white ≈ 5.6:1.
+ */
+:root {
+  --canvas: #f6f4ee;
+  --surface: #ffffff;
+  --surface-2: #f0ede4;
+  --surface-3: #e8e4d8;
+  --line: #e2ddd0;
+  --line-strong: #cfc8b7;
+  --ink: #1d221f;
+  --ink-2: #434b45;
+  --ink-3: #626a63;
+  --forest: #2e5a45;
+  --forest-2: #24483a;
+  --sage: #8fae96;
+  --sage-soft: #e3ece4;
+  --sage-tint: #f1f5f0;
+  --ochre: #b98535;
+  --ochre-ink: #85591a;
+  --ochre-soft: #f6ead3;
+  --slate: #4f6d8a;
+  --slate-ink: #3c5872;
+  --slate-soft: #e3eaf1;
+  --danger: #a3452f;
+  --danger-soft: #f7e4dd;
+  --shadow-sm: 0 1px 2px rgb(40 36 24 / 0.06);
+  --shadow-md: 0 1px 2px rgb(40 36 24 / 0.05), 0 8px 24px -12px rgb(40 36 24 / 0.18);
+  --shadow-lg: 0 2px 4px rgb(40 36 24 / 0.05), 0 24px 48px -20px rgb(40 36 24 / 0.28);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-forest: var(--forest);
+  --color-forest-2: var(--forest-2);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-sage-tint: var(--sage-tint);
+  --color-ochre: var(--ochre);
+  --color-ochre-ink: var(--ochre-ink);
+  --color-ochre-soft: var(--ochre-soft);
+  --color-slate: var(--slate);
+  --color-slate-ink: var(--slate-ink);
+  --color-slate-soft: var(--slate-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), ui-serif, Georgia, serif;
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --radius-card: 1.25rem;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  background: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--sage-soft);
+}
+
+/* MapLibre tuning to match the palette */
+.maplibregl-ctrl-group {
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-md) !important;
+  overflow: hidden;
+}
+.maplibregl-ctrl-attrib {
+  font-size: 11px;
+  background: rgb(255 255 255 / 0.82) !important;
+  border-radius: 8px 0 0 0;
+}
+.maplibregl-canvas:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 10px;
+}
