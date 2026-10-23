@@ -57,14 +57,11 @@ export function PhotoGallery({
           className="block size-full cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
           aria-label={`Open photo ${i + 1} of ${n} full size`}
         >
-          <img
+          <StagePhoto
             key={cur.thumb_url}
-            src={cur.thumb_url}
+            photo={cur}
             alt={cur.caption ?? `Listing photo ${i + 1} of ${n}`}
-            fetchPriority="high"
-            decoding="async"
-            className="size-full object-cover object-center"
-            onError={() => markBroken(cur.thumb_url)}
+            onBroken={() => markBroken(cur.thumb_url)}
           />
         </button>
         {n > 1 && (
@@ -101,6 +98,60 @@ export function PhotoGallery({
         <Viewer photos={usable} index={i} onIndex={setIndex} onClose={() => setViewerOpen(false)} />
       )}
     </figure>
+  );
+}
+
+// The stage is 3:2. Listing photos range from 3:4 portraits to 2.1:1 panoramas, so only photos close
+// to the frame's shape fill it (light crop); the rest are shown whole over a blurred copy of themselves.
+const STAGE_RATIO = 3 / 2;
+const MAX_COVER_STRETCH = 1.2;
+
+function fillsStage(w: number, h: number) {
+  const r = w / h / STAGE_RATIO;
+  return r <= MAX_COVER_STRETCH && r >= 1 / MAX_COVER_STRETCH;
+}
+
+/**
+ * One photo on the stage. `thumb_url` is nominally 800px wide (sometimes an upscale of a smaller original),
+ * `full_url` is the largest copy and never upscaled, so the browser picks by rendered size and pixel density.
+ */
+function StagePhoto({ photo, alt, onBroken }: { photo: ListingPhoto; alt: string; onBroken: () => void }) {
+  const [fit, setFit] = useState<"cover" | "contain" | null>(null);
+  const ref = useRef<HTMLImageElement>(null);
+  const measure = (img: HTMLImageElement) => setFit(fillsStage(img.naturalWidth, img.naturalHeight) ? "cover" : "contain");
+  // A cached image can finish before hydration, in which case onLoad never fires.
+  useEffect(() => {
+    const img = ref.current;
+    if (img?.complete && img.naturalWidth) measure(img);
+  }, []);
+  return (
+    <>
+      {fit === "contain" && (
+        <img
+          src={photo.thumb_url}
+          alt=""
+          aria-hidden
+          decoding="async"
+          className="absolute inset-0 size-full scale-110 object-cover opacity-60 blur-2xl"
+        />
+      )}
+      <img
+        ref={ref}
+        src={photo.thumb_url}
+        srcSet={`${photo.thumb_url} 800w, ${photo.full_url} ${photo.full_width ?? 1536}w`}
+        sizes="(min-width: 1024px) 560px, calc(100vw - 2rem)"
+        alt={alt}
+        fetchPriority="high"
+        decoding="async"
+        onLoad={(e) => measure(e.currentTarget)}
+        onError={onBroken}
+        className={clsx(
+          "relative size-full object-center transition-opacity duration-200",
+          fit === "cover" ? "object-cover" : "object-contain",
+          fit ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </>
   );
 }
 
