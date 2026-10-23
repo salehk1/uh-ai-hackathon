@@ -13,3 +13,5 @@ python-dotenv==1.2.4
 scikit-learn==1.9.1
 supabase==2.33.0
 uvicorn==0.54.0
+httpx==0.28.1
+psycopg-pool==3.3.3
