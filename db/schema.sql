@@ -1,4 +1,5 @@
 -- Houston Price Receipt: one row per cleaned listing with its fair-price prediction.
+-- label = verdict vs the calibrated 80% range: high (> q90), low (< q10), expected.
 drop table if exists homes;
 create table homes (
   zpid          bigint primary key,
@@ -13,8 +14,10 @@ create table homes (
   year_built    double precision,
   school_mean   double precision,
   pred_price    double precision,
+  q10_price     double precision,
+  q90_price     double precision,
   residual_pct  double precision,
-  label         text check (label in ('overpriced', 'underpriced', 'fair')),
+  label         text check (label in ('high', 'low', 'expected')),
   contributions jsonb,
   description   text,
   ppsf          double precision generated always as (price / nullif(living_area, 0)) stored

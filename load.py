@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 COLS = {"zpid": "zpid", "latitude": "lat", "longitude": "lon", "zipcode": "zipcode", "homeType": "home_type",
         "price": "price", "livingArea": "living_area", "bedrooms": "beds", "bathrooms": "baths",
         "yearBuilt": "year_built", "school_mean": "school_mean", "pred_price": "pred_price",
+        "q10_price": "q10_price", "q90_price": "q90_price",
         "residual_pct": "residual_pct", "label": "label", "contributions": "contributions",
         "description": "description"}
 

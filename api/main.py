@@ -33,6 +33,8 @@ pool = ConnectionPool(os.environ["SUPABASE_DB_URL"], min_size=1, max_size=5,
 # Model artifacts for /predict
 META = json.loads((ROOT / "data/models/meta.json").read_text())
 BOOSTER = lgb.Booster(model_file=str(ROOT / "data/models/lgbm.txt"))
+QBOOST = {q: lgb.Booster(model_file=str(ROOT / f"data/models/lgbm_{q}.txt")) for q in ("q10", "q50", "q90")}
+WIDEN = float(META.get("interval_widening_log", 0.0))
 REF = pd.read_parquet(ROOT / "data/features.parquet")
 COEFS = pd.read_parquet(ROOT / "data/gwr_coefs.parquet").set_index("zpid").loc[REF.zpid]
 REF_XY = sp.xy_km(REF.latitude, REF.longitude)
@@ -86,6 +88,26 @@ class PredictIn(BaseModel):
     no_flood: bool = False
     garage: bool = True
     acreage: bool = False
+    description: Optional[str] = None
+
+
+PCA_INFO = META.get("text_emb_pca")
+_ENCODER = None
+
+
+def text_features(desc):
+    """PCA'd MiniLM embedding of the description, only if the published models use it."""
+    global _ENCODER
+    if not PCA_INFO:
+        return np.empty((1, 0))
+    pca = np.load(ROOT / "data/models" / PCA_INFO["file"])
+    if not desc:  # no text: use the training mean, i.e. a zero PCA projection
+        return np.zeros((1, PCA_INFO["n"]))
+    if _ENCODER is None:
+        from sentence_transformers import SentenceTransformer
+        _ENCODER = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", device="cpu")
+    e = _ENCODER.encode([desc], normalize_embeddings=True)
+    return (e - pca["mean"]) @ pca["components"].T
 
 
 @app.post("/predict")
@@ -110,12 +132,16 @@ def predict(p: PredictIn):
     for k in TEXT_FLAGS:
         raw[f"flag_{k}"] = int(getattr(p, k))
     x = np.array([[raw[f] for f in META["lgb_features"]]], float)
-    log_ppsf = float(np.clip(BOOSTER.predict(x)[0], *Y_RANGE))
-    price = p.living_area * np.exp(log_ppsf)
+    x = np.c_[x, text_features(p.description)]
+    qs = {k: float(np.clip(b.predict(x)[0], *Y_RANGE)) for k, b in QBOOST.items()}
+    q50 = qs["q50"]
+    lo, hi = min(qs["q10"], q50) - WIDEN, max(qs["q90"], q50) + WIDEN
+    price = p.living_area * np.exp(q50)
     Z, _ = sp.standardize(pd.DataFrame([raw]), META["vars"], STATS)
     betas = COEFS.iloc[nn[0]][BCOLS].to_numpy(float)  # GWR coefficients of the nearest home
     rc = receipt.build(raw, Z[0], betas, META["vars"], price)
-    return {"pred_price": round(price), "ppsf": round(price / p.living_area, 1),
+    return {"pred_price": round(price), "q10_price": round(p.living_area * np.exp(lo)),
+            "q90_price": round(p.living_area * np.exp(hi)), "ppsf": round(price / p.living_area, 1),
             "nearest_zpid": int(REF.zpid.iloc[nn[0]]), "receipt": rc}
 
 
@@ -149,11 +175,11 @@ def search(s: SearchIn):
         prm.update(la=s.near_lat, lo=s.near_lon, r=s.radius_km or 5)
         dist = DIST_SQL
         where.append(f"{DIST_SQL} <= %(r)s")
-    rows = q(f"""select zpid, lat, lon, zipcode, home_type, price, pred_price, residual_pct, label,
+    rows = q(f"""select zpid, lat, lon, zipcode, home_type, price, pred_price, q10_price, q90_price, residual_pct, label,
                         living_area, beds, baths, year_built, school_mean, round(ppsf::numeric,1) as ppsf,
                         round(({dist})::numeric, 2) as dist_km
                  from homes where {' and '.join(where)} order by residual_pct asc limit 20""", prm)
-    return {"count": len(rows), "order": "most underpriced first", "homes": clean(rows)}
+    return {"count": len(rows), "order": "lowest asking vs fair price first", "homes": clean(rows)}
 
 
 @app.get("/compare")
@@ -162,8 +188,8 @@ def compare(zips: str):
     rows = q("""select zipcode, count(*) as n,
                        round(percentile_cont(0.5) within group (order by ppsf)::numeric, 1) as median_ppsf,
                        round(percentile_cont(0.5) within group (order by price)::numeric, 0) as median_price,
-                       round(100.0*avg((label='overpriced')::int), 1) as pct_overpriced,
-                       round(100.0*avg((label='underpriced')::int), 1) as pct_underpriced,
+                       round(100.0*avg((label='high')::int), 1) as pct_high,
+                       round(100.0*avg((label='low')::int), 1) as pct_low,
                        round(avg(school_mean)::numeric, 2) as mean_school
                 from homes where zipcode = any(%s) group by zipcode order by zipcode""", (zl,))
     return {"zips": clean(rows), "missing": [z for z in zl if z not in {r["zipcode"] for r in rows}]}
@@ -171,7 +197,7 @@ def compare(zips: str):
 
 @app.get("/map")
 def map_(metric: str = Query("residual_pct", pattern="^(residual_pct|ppsf|label)$"), zip: Optional[str] = None):
-    rows = q(f"""select zpid, lat, lon, zipcode, price, pred_price, residual_pct, label, round(ppsf::numeric,1) as ppsf
+    rows = q(f"""select zpid, lat, lon, zipcode, price, pred_price, q10_price, q90_price, residual_pct, label, round(ppsf::numeric,1) as ppsf
                  from homes {'where zipcode = %s' if zip else ''} order by random() limit 3000""",
              (zip,) if zip else ())
     feats = [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [r["lon"], r["lat"]]},
@@ -200,7 +226,9 @@ You are the Houston Price Receipt analyst. You have tools over ~21.7k Houston li
 fair-price model (LightGBM, spatial-block CV) and GWR-based price receipts.
 Rules: answer ONLY from tool results; cite the specific numbers you got; never invent prices,
 zip codes or statistics; if tools don't cover the question, say so. Be concise (<=120 words).
-'residual_pct' = (list - predicted)/predicted; overpriced > +10%, underpriced < -10%.
+Each home has a calibrated 80% fair-price range [q10, q90] from quantile models.
+label/verdict: 'high' = asking above q90, 'low' = asking below q10, else 'expected'.
+'residual_pct' = (asking - fair)/fair. Never state a probability or confidence % the tools did not return.
 Downtown Houston is at lat 29.7604, lon -95.3698; Galleria 29.7390,-95.4631; Texas Medical Center 29.7069,-95.4011."""
 
 
@@ -216,10 +244,10 @@ TOOLS = [
         {"living_area": NUM, "beds": NUM, "baths": NUM, "year_built": NUM, "lat": NUM, "lon": NUM,
          "home_type": {"type": "string", "enum": HOME_TYPES}, "pool": {"type": "boolean"}},
         ["living_area", "beds", "baths", "year_built", "lat", "lon"]),
-    _fn("search", "Find up to 20 listings, most underpriced first.",
+    _fn("search", "Find up to 20 listings, lowest asking-vs-fair first.",
         {"max_price": NUM, "min_beds": NUM, "zipcode": STR, "near_lat": NUM, "near_lon": NUM, "radius_km": NUM,
-         "label": {"type": "string", "enum": ["overpriced", "underpriced", "fair"]}}),
-    _fn("compare", "Compare zip codes: median $/sqft, % over/underpriced, mean school rating.",
+         "label": {"type": "string", "enum": ["high", "low", "expected"]}}),
+    _fn("compare", "Compare zip codes: median $/sqft, % priced high/low vs the fair range, mean school rating.",
         {"zips": {"type": "string", "description": "comma-separated, e.g. 77002,77019"}}, ["zips"]),
     _fn("map", "Map listings colored by a metric, optionally for one zip.",
         {"metric": {"type": "string", "enum": ["residual_pct", "ppsf", "label"]}, "zip": STR}),

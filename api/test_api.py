@@ -15,7 +15,7 @@ def check(name, r, fn=lambda j: ""):
 
 
 check("GET /health", c.get("/health"), lambda j: j)
-s = check("POST /search", c.post("/search", json={"max_price": 400000, "min_beds": 3, "label": "underpriced",
+s = check("POST /search", c.post("/search", json={"max_price": 400000, "min_beds": 3, "label": "low",
                                                  "near_lat": 29.7604, "near_lon": -95.3698, "radius_km": 10}),
           lambda j: f"{j['count']} homes, top residual {j['homes'][0]['residual_pct'] if j['homes'] else None}")
 zpid = s["homes"][0]["zpid"] if s and s["homes"] else 0
@@ -26,13 +26,13 @@ check("POST /predict", c.post("/predict", json={"living_area": 2000, "beds": 3, 
                                                 "lat": 29.80, "lon": -95.40}),
       lambda j: f"${j['pred_price']:,} ({j['ppsf']}/sqft), {len(j['receipt']['items'])} receipt lines")
 check("GET /compare", c.get("/compare", params={"zips": "77002,77019,77494"}),
-      lambda j: [(z["zipcode"], z["median_ppsf"], z["pct_overpriced"]) for z in j["zips"]])
+      lambda j: [(z["zipcode"], z["median_ppsf"], z["pct_high"]) for z in j["zips"]])
 check("GET /map", c.get("/map", params={"metric": "ppsf"}), lambda j: f"{len(j['features'])} points")
 check("GET /map?zip", c.get("/map", params={"metric": "label", "zip": "77019"}), lambda j: f"{len(j['features'])} points")
 check("GET /stats", c.get("/stats"), lambda j: f"best={j['best_model']}")
 for mode in ["auto", "json"]:
     t = time.time()
     check(f"POST /chat ({mode})", c.post("/chat", json={"message": "Compare 77019 and 77002 on price per sqft, "
-                                                        "and which is more overpriced?", "mode": mode}),
+                                                        "and which has more listings priced high?", "mode": mode}),
           lambda j: f"[{j['mode']}] tools={[x['tool'] for x in j['tool_calls']]} visuals="
                     f"{[v['type'] for v in j['visuals']]} {time.time() - t:.0f}s\n     -> {j['text'][:300]}")

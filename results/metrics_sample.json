@@ -1,0 +1,85 @@
+{
+  "n": 475,
+  "n_zestimate": 455,
+  "cv": "5-fold spatial block CV (2km grid)",
+  "best_model": "LightGBM",
+  "published_model": "LightGBM q50 + calibrated q10/q90",
+  "gwr_k": 200,
+  "config": {
+    "params": {
+      "objective": "regression",
+      "learning_rate": 0.03,
+      "num_leaves": 63,
+      "min_child_samples": 20,
+      "feature_fraction": 0.8,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 1,
+      "lambda_l2": 1.0,
+      "verbose": -1
+    },
+    "rounds": 1200,
+    "text_emb": false
+  },
+  "intervals": {
+    "target": 0.8,
+    "coverage_raw_q10_q90": 0.5137,
+    "coverage_calibrated": 0.8042,
+    "coverage_calibrated_by_home_type": {
+      "SINGLE_FAMILY": 0.81,
+      "TOWNHOUSE": 0.75,
+      "CONDO": 0.6923
+    },
+    "calibration": "cross-fold conformalized quantile regression (log ppsf)",
+    "fold_widening_log": {
+      "0": 0.0969,
+      "1": 0.09,
+      "2": 0.104,
+      "3": 0.0969,
+      "4": 0.104
+    },
+    "final_widening_log": 0.0985,
+    "median_width_pct": 50.5,
+    "verdict_counts": {
+      "expected": 382,
+      "high": 52,
+      "low": 41
+    }
+  },
+  "leaderboard": {
+    "OLS": {
+      "MAE": 72643.0,
+      "MAPE": 17.44,
+      "R2": 0.7203,
+      "MAPE_zestimate_rows": 17.24,
+      "moran_resid_oof": 0.2165
+    },
+    "GWR": {
+      "MAE": 75335.0,
+      "MAPE": 18.16,
+      "R2": 0.6572,
+      "MAPE_zestimate_rows": 18.05,
+      "moran_resid_oof": 0.1089
+    },
+    "LightGBM": {
+      "MAE": 54293.0,
+      "MAPE": 12.55,
+      "R2": 0.8087,
+      "MAPE_zestimate_rows": 12.47,
+      "moran_resid_oof": 0.0143
+    },
+    "LightGBM q50 (published fair price)": {
+      "MAE": 57996.0,
+      "MAPE": 12.92,
+      "R2": 0.7767,
+      "MAPE_zestimate_rows": 12.81,
+      "moran_resid_oof": 0.0519
+    },
+    "Zestimate (benchmark)": {
+      "MAE": 12601.0,
+      "MAPE": 3.36,
+      "R2": 0.9947,
+      "MAPE_zestimate_rows": 3.36,
+      "moran_resid_oof": null
+    }
+  }
+}
