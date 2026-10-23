@@ -1,0 +1,15 @@
+fastapi==0.161.1
+ijson==3.6.0
+lightgbm==4.7.0
+matplotlib==3.11.2
+numpy==2.5.4
+openai==3.37.0
+pandas==3.1.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+pyarrow==26.0.0
+pykx==4.1.0
+python-dotenv==1.2.4
+scikit-learn==1.9.1
+supabase==2.33.0
+uvicorn==0.54.0
