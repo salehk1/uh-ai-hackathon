@@ -44,7 +44,7 @@ export function PhotoGallery({
 
   return (
     <figure
-      className="flex flex-col gap-2"
+      className="flex w-full min-w-0 flex-col gap-2"
       role="region"
       aria-roledescription="carousel"
       aria-label={`Listing photos, ${n} total`}
@@ -77,7 +77,7 @@ export function PhotoGallery({
       </div>
 
       {n > 1 && (
-        <ol className="flex snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]" aria-label="Photo thumbnails">
+        <ol className="flex w-full min-w-0 snap-x gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]" aria-label="Photo thumbnails">
           {usable.map((p, k) => (
             <li key={p.thumb_url} className="shrink-0 snap-start">
               <Thumb photo={p} active={k === i} label={`Show photo ${k + 1} of ${n}`} onSelect={() => setIndex(k)} onBroken={() => markBroken(p.thumb_url)} />
@@ -268,7 +268,7 @@ function Viewer({ photos, index, onIndex, onClose }: { photos: ListingPhoto[]; i
 
 function Fallback({ zpid, homeType, photoCount, hadPhotos }: { zpid: number; homeType: string | null; photoCount: number | null; hadPhotos: boolean }) {
   return (
-    <figure className="flex flex-col gap-2">
+    <figure className="flex w-full min-w-0 flex-col gap-2">
       <div className="relative aspect-[3/2] overflow-hidden rounded-[18px] border border-line bg-sky">
         <HouseIllustration seed={zpid} homeType={homeType} />
         <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-surface/90 px-2.5 py-1 text-[11.5px] font-medium text-ink-2 shadow-sm backdrop-blur">
