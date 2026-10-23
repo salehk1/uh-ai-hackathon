@@ -46,8 +46,11 @@ describe("committed results/metrics.json", () => {
   const metrics = statsSchema.parse(JSON.parse(readFileSync(new URL("../../results/metrics.json", import.meta.url), "utf8")));
   it("validates and resolves the published model's leaderboard row dynamically", () => {
     const key = publishedKey(metrics);
-    expect(key).not.toBeNull();
-    expect(metrics.leaderboard[key!].MAPE).toBeCloseTo(11.59);
-    expect(metrics.leaderboard[key!].MAE).toBe(66261);
+    // The published quantile model differs from the best point-prediction model.
+    // Keep checking that distinction after merging newer backend model results.
+    expect(key).toBe("LightGBM q50 (published fair price)");
+    expect(key).not.toBe(metrics.best_model);
+    expect(metrics.leaderboard[key!].MAPE).toBeCloseTo(11.19);
+    expect(metrics.leaderboard[key!].MAE).toBe(65422);
   });
 });
