@@ -1,0 +1,17 @@
+# Runtime deps for the hosted API only. No pykx: spatial.py falls back to numpy, so q never runs on the server.
+--extra-index-url https://download.pytorch.org/whl/cpu
+fastapi==0.161.1
+uvicorn==0.54.0
+lightgbm==4.7.0
+numpy==2.5.4
+pandas==3.1.0
+pyarrow==26.0.0
+scikit-learn==1.9.1
+openai==3.37.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+psycopg-pool==3.3.3
+python-dotenv==1.2.4
+httpx==0.28.1
+sentence-transformers==6.2.0
+torch==2.14.1+cpu

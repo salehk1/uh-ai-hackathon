@@ -1,0 +1,29 @@
+app = "quanthouse"
+primary_region = "dfw"
+
+[build]
+
+[deploy]
+  release_command = "python load.py --if-changed"
+  release_command_timeout = "10m"
+
+[env]
+  HF_HUB_OFFLINE = "1"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "60s"
+    interval = "30s"
+    timeout = "10s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "2gb"

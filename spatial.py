@@ -11,6 +11,7 @@ from scipy.spatial import cKDTree
 log = logging.getLogger("spatial")
 LAT0, LON0 = 29.7604, -95.3698
 Z_CLIP = 3.0
+GWR_RIDGE = 0.05  # x local kernel-weight sum; best OOF RMSE in a spatial-CV sweep over {0.01, 0.05, 0.2, 1}
 GWR_VARS = ["livingArea", "age", "school_mean", "dist_downtown", "bedrooms", "bathrooms"]
 
 try:
@@ -29,7 +30,7 @@ if Q:
     moranperm:{[z;idx;n] z:z-avg z; d:sum z*z; {[z;idx;d;s] zz:neg[count z]?z; (sum zz*avg each zz idx)%d}[z;idx;d] each til n};
     gwr:{[X;y;idx;w;lam]
       p:count first X; R:lam*"f"$t=/:t:til p; R[0;0]:0f;
-      {[X;y;R;i;wi] Xi:X i; Xw:Xi*wi; (inv R+(flip Xw) mmu Xi) mmu (flip Xw) mmu y i}[X;y;R]'[idx;w]};
+      {[X;y;R;i;wi] Xi:X i; Xw:Xi*wi; (inv (R*sum wi)+(flip Xw) mmu Xi) mmu (flip Xw) mmu y i}[X;y;R]'[idx;w]};
     """)
 
 
@@ -86,8 +87,12 @@ def bisquare(d):
     return (1 - (d / h) ** 2) ** 2
 
 
-def gwr_fit(X_ref, y_ref, idx, w, lam=1e-2):
-    """Local WLS at each query point. X_ref includes an intercept column. Returns (m, p) betas."""
+def gwr_fit(X_ref, y_ref, idx, w, lam=GWR_RIDGE):
+    """Local WLS at each query point. X_ref includes an intercept column. Returns (m, p) betas.
+
+    Ridge on the slopes is scaled by each point's total kernel weight (lam * sum w), so a slope a
+    neighborhood can't identify (e.g. distance-to-downtown inside a small cluster) shrinks toward 0
+    and the local intercept keeps the neighborhood's price level, which keeps receipts interpretable."""
     X_ref = np.asarray(X_ref, float)
     y_ref = np.asarray(y_ref, float)
     if Q:
@@ -98,7 +103,7 @@ def gwr_fit(X_ref, y_ref, idx, w, lam=1e-2):
     R[0, 0] = 0
     Xi = X_ref[idx]                                   # m,k,p
     Xw = Xi * w[..., None]
-    A = np.einsum("mkp,mkq->mpq", Xw, Xi) + R
+    A = np.einsum("mkp,mkq->mpq", Xw, Xi) + R * w.sum(1)[:, None, None]
     rhs = np.einsum("mkp,mk->mp", Xw, y_ref[idx])
     return np.linalg.solve(A, rhs[..., None])[..., 0]
 

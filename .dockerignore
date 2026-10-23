@@ -1,0 +1,14 @@
+.env
+.venv/
+.git/
+**/__pycache__/
+data/raw/
+data/*_sample.*
+data/models/*_sample.*
+results/*_sample.*
+data/desc_emb*.npz
+data/oof_*.npy
+frontend/node_modules/
+frontend/.next/
+frontend/.env*.local
+frontend/.env

@@ -1,5 +1,10 @@
 .env
-data/
 .venv/
 __pycache__/
 *.pyc
+# Raw Zillow dump (6.7GB) never goes to git; processed data and models under 50MB do.
+data/raw/
+data/*_sample.*
+data/oof_*.npy
+data/models/*_sample.*
+results/*_sample.*

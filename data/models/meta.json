@@ -1,0 +1,160 @@
+{
+  "best_model": "LightGBM tuned + text \u2212 spatial lag",
+  "lgb_features": [
+    "livingArea",
+    "lotSize_acres",
+    "bedrooms",
+    "bathrooms",
+    "age",
+    "monthlyHoaFee",
+    "propertyTaxRate",
+    "school_mean",
+    "dist_downtown",
+    "dist_galleria",
+    "dist_tmc",
+    "type_SINGLE_FAMILY",
+    "type_TOWNHOUSE",
+    "type_CONDO",
+    "flag_pool",
+    "flag_renovated",
+    "flag_new_construction",
+    "flag_no_flood",
+    "flag_garage",
+    "flag_acreage",
+    "latitude",
+    "longitude",
+    "spatial_lag"
+  ],
+  "ols_features": [
+    "livingArea",
+    "lotSize_acres",
+    "bedrooms",
+    "bathrooms",
+    "age",
+    "monthlyHoaFee",
+    "propertyTaxRate",
+    "school_mean",
+    "dist_downtown",
+    "dist_galleria",
+    "dist_tmc",
+    "type_TOWNHOUSE",
+    "type_CONDO",
+    "flag_pool",
+    "flag_renovated",
+    "flag_new_construction",
+    "flag_no_flood",
+    "flag_garage",
+    "flag_acreage"
+  ],
+  "ols_beta": [
+    5.791524273643655,
+    2.428775770501546e-05,
+    0.004506081714825431,
+    -0.10509099779488827,
+    0.05156551929706721,
+    -0.001279153969259137,
+    2.6976188628305582e-05,
+    -0.2661936256498942,
+    0.05294168645843631,
+    -0.004498351560537756,
+    -0.008227412522890613,
+    0.004295912139781264,
+    -0.20399397137750794,
+    -0.22281727019569292,
+    0.023853748546402518,
+    0.0028430932745256224,
+    0.010218551494928351,
+    -0.03334223043895524,
+    0.033856514050835236,
+    0.21721022995721664
+  ],
+  "interval_widening_log": {
+    "CONDO": 0.1471742406784468,
+    "SINGLE_FAMILY": 0.049842297045202356,
+    "TOWNHOUSE": 0.07011489916635412
+  },
+  "text_emb_pca": {
+    "n": 16,
+    "file": "pca.npz"
+  },
+  "quantile_features": [
+    "livingArea",
+    "lotSize_acres",
+    "bedrooms",
+    "bathrooms",
+    "age",
+    "monthlyHoaFee",
+    "propertyTaxRate",
+    "school_mean",
+    "dist_downtown",
+    "dist_galleria",
+    "dist_tmc",
+    "type_SINGLE_FAMILY",
+    "type_TOWNHOUSE",
+    "type_CONDO",
+    "flag_pool",
+    "flag_renovated",
+    "flag_new_construction",
+    "flag_no_flood",
+    "flag_garage",
+    "flag_acreage",
+    "latitude",
+    "longitude",
+    "text_pc0",
+    "text_pc1",
+    "text_pc2",
+    "text_pc3",
+    "text_pc4",
+    "text_pc5",
+    "text_pc6",
+    "text_pc7",
+    "text_pc8",
+    "text_pc9",
+    "text_pc10",
+    "text_pc11",
+    "text_pc12",
+    "text_pc13",
+    "text_pc14",
+    "text_pc15"
+  ],
+  "y_range": [
+    4.526491602076708,
+    6.501942646978208
+  ],
+  "k_best": 200,
+  "vars": [
+    "livingArea",
+    "age",
+    "school_mean",
+    "dist_downtown",
+    "bedrooms",
+    "bathrooms"
+  ],
+  "stats": {
+    "livingArea": [
+      2431.9949212798374,
+      1182.6535256703319
+    ],
+    "age": [
+      19.652754051433583,
+      24.311795724696097
+    ],
+    "school_mean": [
+      5.217784754605476,
+      1.453721522553566
+    ],
+    "dist_downtown": [
+      30.960135696847505,
+      15.323995084047851
+    ],
+    "bedrooms": [
+      3.541299228957939,
+      0.9016101745268205
+    ],
+    "bathrooms": [
+      3.0221155177986057,
+      1.154961886563083
+    ]
+  },
+  "k_lag": 15
+}

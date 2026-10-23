@@ -1,0 +1,242 @@
+{
+  "rows": {
+    "LightGBM \u2212 spatial lag": {
+      "MAE": 64449.0,
+      "MAPE": 11.36,
+      "R2": 0.883,
+      "MAPE_zestimate_rows": 11.34,
+      "moran_resid_oof": 0.2381,
+      "delta_MAPE_vs_full": -0.29
+    },
+    "LightGBM \u2212 text flags": {
+      "MAE": 66820.0,
+      "MAPE": 11.89,
+      "R2": 0.8819,
+      "MAPE_zestimate_rows": 11.86,
+      "moran_resid_oof": 0.2295,
+      "delta_MAPE_vs_full": 0.24
+    },
+    "LightGBM \u2212 schools": {
+      "MAE": 66446.0,
+      "MAPE": 11.78,
+      "R2": 0.8823,
+      "MAPE_zestimate_rows": 11.74,
+      "moran_resid_oof": 0.2331,
+      "delta_MAPE_vs_full": 0.12
+    },
+    "LightGBM + MiniLM text (PCA 16)": {
+      "MAE": 65468.0,
+      "MAPE": 11.57,
+      "R2": 0.8899,
+      "MAPE_zestimate_rows": 11.53,
+      "moran_resid_oof": 0.2283,
+      "delta_MAPE_vs_full": -0.08
+    },
+    "LightGBM tuned (Optuna, 40 trials)": {
+      "MAE": 65270.0,
+      "MAPE": 11.48,
+      "R2": 0.8803,
+      "MAPE_zestimate_rows": 11.45,
+      "moran_resid_oof": 0.2253,
+      "delta_MAPE_vs_full": -0.17
+    },
+    "LightGBM tuned \u2212 spatial lag": {
+      "MAE": 64573.0,
+      "MAPE": 11.36,
+      "R2": 0.883,
+      "MAPE_zestimate_rows": 11.33,
+      "moran_resid_oof": 0.2416,
+      "delta_MAPE_vs_full": -0.29
+    },
+    "LightGBM tuned + text": {
+      "MAE": 64924.0,
+      "MAPE": 11.39,
+      "R2": 0.885,
+      "MAPE_zestimate_rows": 11.36,
+      "moran_resid_oof": 0.2223,
+      "delta_MAPE_vs_full": -0.26
+    },
+    "LightGBM tuned + text \u2212 spatial lag": {
+      "MAE": 63327.0,
+      "MAPE": 11.07,
+      "R2": 0.8903,
+      "MAPE_zestimate_rows": 11.06,
+      "moran_resid_oof": 0.2509,
+      "delta_MAPE_vs_full": -0.58
+    }
+  },
+  "notes": {
+    "optuna": {
+      "trials": 40,
+      "best_params": {
+        "num_leaves": 134,
+        "learning_rate": 0.018754471887690163,
+        "min_child_samples": 38,
+        "feature_fraction": 0.5427014266560239
+      },
+      "best_MAPE": 11.481,
+      "default_MAPE": 11.652,
+      "minutes": 20.8,
+      "history": [
+        11.652,
+        11.76,
+        12.147,
+        11.862,
+        11.532,
+        11.597,
+        11.645,
+        11.672,
+        11.6,
+        11.714,
+        11.512,
+        11.529,
+        11.525,
+        11.554,
+        11.523,
+        11.614,
+        11.554,
+        11.776,
+        11.679,
+        11.576,
+        11.585,
+        11.523,
+        11.514,
+        11.532,
+        11.584,
+        11.574,
+        11.515,
+        11.492,
+        11.563,
+        11.495,
+        11.481,
+        11.557,
+        11.509,
+        11.509,
+        11.523,
+        11.522,
+        11.492,
+        11.539,
+        11.522,
+        11.549
+      ]
+    },
+    "error_breakdown": {
+      "by_home_type": [
+        {
+          "type": "SINGLE_FAMILY",
+          "MAPE": 10.43,
+          "n": 19543
+        },
+        {
+          "type": "TOWNHOUSE",
+          "MAPE": 13.25,
+          "n": 989
+        },
+        {
+          "type": "CONDO",
+          "MAPE": 20.22,
+          "n": 1127
+        }
+      ],
+      "by_price_decile": [
+        {
+          "decile": 1,
+          "MAPE": 16.23,
+          "lo": 65000.0,
+          "hi": 235990.0,
+          "n": 2169
+        },
+        {
+          "decile": 2,
+          "MAPE": 9.2,
+          "lo": 235999.0,
+          "hi": 279900.0,
+          "n": 2206
+        },
+        {
+          "decile": 3,
+          "MAPE": 8.97,
+          "lo": 279980.0,
+          "hi": 315000.0,
+          "n": 2162
+        },
+        {
+          "decile": 4,
+          "MAPE": 8.37,
+          "lo": 315240.0,
+          "hi": 349900.0,
+          "n": 2153
+        },
+        {
+          "decile": 5,
+          "MAPE": 8.73,
+          "lo": 349939.0,
+          "hi": 385990.0,
+          "n": 2141
+        },
+        {
+          "decile": 6,
+          "MAPE": 9.14,
+          "lo": 386000.0,
+          "hi": 431000.0,
+          "n": 2164
+        },
+        {
+          "decile": 7,
+          "MAPE": 9.07,
+          "lo": 431200.0,
+          "hi": 491990.0,
+          "n": 2166
+        },
+        {
+          "decile": 8,
+          "MAPE": 10.5,
+          "lo": 492537.0,
+          "hi": 585000.0,
+          "n": 2170
+        },
+        {
+          "decile": 9,
+          "MAPE": 11.97,
+          "lo": 585540.0,
+          "hi": 770242.0,
+          "n": 2162
+        },
+        {
+          "decile": 10,
+          "MAPE": 18.51,
+          "lo": 771300.0,
+          "hi": 13000000.0,
+          "n": 2166
+        }
+      ]
+    },
+    "learning_curve": [
+      {
+        "train_frac": 0.1,
+        "n_train": 1732,
+        "MAPE": 13.361
+      },
+      {
+        "train_frac": 0.25,
+        "n_train": 4331,
+        "MAPE": 12.128
+      },
+      {
+        "train_frac": 0.5,
+        "n_train": 8663,
+        "MAPE": 11.619
+      },
+      {
+        "train_frac": 0.75,
+        "n_train": 12995,
+        "MAPE": 11.371
+      },
+      {
+        "train_frac": 1.0,
+        "n_train": 17327,
+        "MAPE": 11.07
+      }
+    ]
+  }
+}

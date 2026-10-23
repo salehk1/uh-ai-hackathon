@@ -8,6 +8,7 @@ into the leaderboard.
 """
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -27,7 +28,8 @@ from features import FEATURES  # noqa: E402
 BASE_COLS = FEATURES + ["latitude", "longitude"]
 LGB_FEATURES = BASE_COLS + ["spatial_lag"]
 LGB_PARAMS = dict(objective="regression", learning_rate=0.03, num_leaves=63, min_child_samples=20,
-                  feature_fraction=0.8, bagging_fraction=0.8, bagging_freq=1, lambda_l2=1.0, verbose=-1)
+                  feature_fraction=0.8, bagging_fraction=0.8, bagging_freq=1, lambda_l2=1.0, verbose=-1,
+                  num_threads=int(os.environ.get("LGB_THREADS", 0)))  # 0 = all cores
 LGB_ROUNDS = 1200
 OLS_FEATURES = [f for f in FEATURES if f != "type_SINGLE_FAMILY"]  # reference category
 QUANTILES = {"q10": 0.1, "q50": 0.5, "q90": 0.9}
@@ -94,7 +96,8 @@ def load_config():
     p = Path("results/best_config.json")
     cfg = json.loads(p.read_text()) if p.exists() else {}
     return {"params": {**LGB_PARAMS, **cfg.get("params", {})}, "rounds": cfg.get("rounds", LGB_ROUNDS),
-            "text_emb": cfg.get("text_emb", False), "source": str(p) if p.exists() else "defaults"}
+            "text_emb": cfg.get("text_emb", False), "use_lag": cfg.get("use_lag", True),
+            "source": str(p) if p.exists() else "defaults"}
 
 
 def load_emb(df, tag=""):
@@ -138,7 +141,7 @@ def main():
     k_lag, k_gwr = meta["k_lag"], meta["k_best"]
     Xl = df[BASE_COLS].to_numpy(float)
     extra = pca_extra(load_emb(df, args.tag)) if cfg["text_emb"] else None
-    print(f"config: {cfg['source']} text_emb={cfg['text_emb']}")
+    print(f"config: {cfg['source']} text_emb={cfg['text_emb']} use_lag={cfg['use_lag']}")
 
     oof = {}
     Xo = np.c_[np.ones(len(df)), df[OLS_FEATURES].to_numpy(float)]
@@ -157,11 +160,15 @@ def main():
     qo = {}
     for name, a in QUANTILES.items():
         qo[name] = cv_lgb(Xl, y, xy, folds, {**cfg["params"], "objective": "quantile", "alpha": a},
-                          cfg["rounds"], extra=extra, k_lag=k_lag)
+                          cfg["rounds"], use_lag=cfg["use_lag"], extra=extra, k_lag=k_lag)
         print(f"  quantile {name} done", flush=True)
     q50 = qo["q50"]
     lo_raw, hi_raw = np.minimum(qo["q10"], q50), np.maximum(qo["q90"], q50)
-    lo, hi, adj, q_all = calibrate(lo_raw, hi_raw, y, folds)
+    # Mondrian (per home type) calibration: one pooled constant left condos at ~65% coverage.
+    lo, hi, adj, q_all = lo_raw.copy(), hi_raw.copy(), {}, {}
+    for t in sorted(df.homeType.unique()):
+        m = (df.homeType == t).to_numpy()
+        lo[m], hi[m], adj[t], q_all[t] = calibrate(lo_raw[m], hi_raw[m], y[m], folds[m])
     oof["LightGBM q50 (published fair price)"] = q50
 
     has_z = (df.zestimate > 0).to_numpy()
@@ -177,13 +184,17 @@ def main():
     by_type = {t: coverage(lo[m], hi[m], y[m]) for t in df.homeType.unique() for m in [(df.homeType == t).to_numpy()]}
     intervals = {"target": TARGET_COVERAGE, "coverage_raw_q10_q90": coverage(lo_raw, hi_raw, y),
                  "coverage_calibrated": coverage(lo, hi, y), "coverage_calibrated_by_home_type": by_type,
-                 "calibration": "cross-fold conformalized quantile regression (log ppsf)",
-                 "fold_widening_log": adj, "final_widening_log": round(q_all, 4),
+                 "coverage_raw_by_home_type": {t: coverage(lo_raw[m], hi_raw[m], y[m]) for t in df.homeType.unique()
+                                               for m in [(df.homeType == t).to_numpy()]},
+                 "calibration": "cross-fold conformalized quantile regression (log ppsf), separately per home type",
+                 "fold_widening_log": adj, "final_widening_log": {k: round(v, 4) for k, v in q_all.items()},
                  "median_width_pct": round(float(np.median(np.exp(hi - lo) - 1) * 100), 1),
                  "verdict_counts": pd.Series(verdict).value_counts().to_dict()}
     best = min((m for m in board if "Zestimate" not in m), key=lambda m: board[m]["MAPE"])
     out = {"n": len(df), "n_zestimate": int(has_z.sum()), "cv": "5-fold spatial block CV (2km grid)",
-           "best_model": best, "published_model": "LightGBM q50 + calibrated q10/q90", "gwr_k": k_gwr,
+           "best_model": best, "gwr_k": k_gwr,
+           "published_model": "LightGBM q50 + calibrated q10/q90" + (" + MiniLM text" if cfg["text_emb"] else "")
+                              + ("" if cfg["use_lag"] else " (no spatial lag)"),
            "config": {k: v for k, v in cfg.items() if k != "source"}, "intervals": intervals, "leaderboard": board}
     Path("results").mkdir(exist_ok=True)
     Path(f"results/metrics{args.tag}.json").write_text(json.dumps(out, indent=2))
@@ -197,14 +208,17 @@ def main():
     lag_all = sp.spatial_lag(y, nn)
     A = np.c_[Xl, lag_all]
     lgb.train(LGB_PARAMS, lgb.Dataset(A, y), LGB_ROUNDS).save_model(models / f"lgbm{args.tag}.txt")
-    A_q, pca_info = A, None
+    A_q, pca_info = (A if cfg["use_lag"] else Xl), None
+    q_feats = BASE_COLS + (["spatial_lag"] if cfg["use_lag"] else [])
     if cfg["text_emb"]:
         from sklearn.decomposition import PCA
         emb = load_emb(df, args.tag)
         pca = PCA(N_PCA, random_state=0).fit(emb)
-        A_q = np.c_[A, pca.transform(emb)]
+        A_q = np.c_[A_q, pca.transform(emb)]
         np.savez(models / f"pca{args.tag}.npz", components=pca.components_, mean=pca.mean_)
         pca_info = {"n": N_PCA, "file": f"pca{args.tag}.npz"}
+        q_feats = q_feats + [f"text_pc{i}" for i in range(N_PCA)]
+    assert A_q.shape[1] == len(q_feats), (A_q.shape, len(q_feats))
     for name, a in QUANTILES.items():
         lgb.train({**cfg["params"], "objective": "quantile", "alpha": a}, lgb.Dataset(A_q, y),
                   cfg["rounds"]).save_model(models / f"lgbm_{name}{args.tag}.txt")
@@ -212,6 +226,7 @@ def main():
     (models / f"meta{args.tag}.json").write_text(json.dumps(
         {"best_model": best, "lgb_features": LGB_FEATURES, "ols_features": OLS_FEATURES,
          "ols_beta": beta_all.tolist(), "interval_widening_log": q_all, "text_emb_pca": pca_info,
+         "quantile_features": q_feats,
          "y_range": [float(y.min()), float(y.max())], **meta}, indent=2))
 
     pred_price = sqft * np.exp(q50)

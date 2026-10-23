@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens: midnight. Navy canvas, three stepped blue surfaces, cyan for action/selection, violet only
+ * for supporting brand details. Brand is never an analytical meaning. Verdicts: blue = below range,
+ * grey = within, red = above; the verdict blue sits well away from the cyan brand. Amber is reserved for
+ * caution/fixture notices. Contrast: ink-3 on surface-2 ≈ 5.3:1, brand on surface ≈ 9.9:1, on-brand on brand ≈ 11:1.
+ */
+:root {
+  color-scheme: dark;
+  --canvas: #090f1f;
+  --surface: #121d33;
+  --surface-2: #1a2943;
+  --surface-3: #22355a;
+  --line: #304361;
+  --line-strong: #4a6089;
+  --ink: #f2f6ff;
+  --ink-2: #aabad1;
+  --ink-3: #8c9db8;
+  --brand: #43d9e6;
+  --brand-2: #86e8f0;
+  --on-brand: #061219;
+  --violet: #927aff;
+  --brand-soft: #103041;
+  --brand-tint: #11263b;
+  --sky: #0d1830;
+  --amber: #e9a23b;
+  --amber-ink: #f5c46b;
+  --amber-soft: #2c2414;
+  --slate: #6e86ab;
+  --slate-ink: #a6bce0;
+  --slate-soft: #1c2a42;
+  /* Verdict colors (team rule): low = blue, expected = neutral grey, high = red. Always with text + icon. */
+  --v-low: #4f8dff;
+  --v-low-ink: #8db8ff;
+  --v-low-soft: #16284a;
+  --v-expected: #8f9bb0;
+  --v-expected-ink: #c2ccda;
+  --v-expected-soft: #1f2a3d;
+  --v-high: #f2645c;
+  --v-high-ink: #ff968c;
+  --v-high-soft: #3a1b25;
+  --danger: #ff7a70;
+  --danger-soft: #3a1b25;
+  --shadow-sm: 0 1px 2px rgb(2 6 16 / 0.4);
+  --shadow-md: 0 1px 2px rgb(2 6 16 / 0.4), 0 12px 30px -14px rgb(2 6 16 / 0.7);
+  --shadow-lg: 0 2px 4px rgb(2 6 16 / 0.4), 0 30px 60px -24px rgb(2 6 16 / 0.85);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-on-brand: var(--on-brand);
+  --color-violet: var(--violet);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-sky: var(--sky);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-amber-soft: var(--amber-soft);
+  --color-slate: var(--slate);
+  --color-slate-ink: var(--slate-ink);
+  --color-slate-soft: var(--slate-soft);
+  --color-v-low: var(--v-low);
+  --color-v-low-ink: var(--v-low-ink);
+  --color-v-low-soft: var(--v-low-soft);
+  --color-v-expected: var(--v-expected);
+  --color-v-expected-ink: var(--v-expected-ink);
+  --color-v-expected-soft: var(--v-expected-soft);
+  --color-v-high: var(--v-high);
+  --color-v-high-ink: var(--v-high-ink);
+  --color-v-high-soft: var(--v-high-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --radius-card: 1.125rem;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  background: var(--canvas);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: rgb(67 217 230 / 0.3);
+  color: var(--ink);
+}
+
+/* MapLibre tuning to match the palette */
+.maplibregl-ctrl-group {
+  border-radius: 12px !important;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md) !important;
+  overflow: hidden;
+}
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--line) !important;
+}
+.maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--surface-3) !important;
+}
+/* MapLibre's control icons are dark SVGs; flip them for the navy controls. */
+.maplibregl-ctrl-icon,
+.maplibregl-ctrl-attrib-button {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+.maplibregl-ctrl-attrib {
+  font-size: 11px;
+  color: var(--ink-2);
+  background: rgb(9 15 31 / 0.86) !important;
+  border-radius: 8px 0 0 0;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--line);
+}
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib-inner,
+.maplibregl-ctrl-attrib a {
+  color: var(--ink-2) !important;
+}
+.maplibregl-ctrl-attrib a:hover {
+  color: var(--brand) !important;
+}
+.maplibregl-canvas:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 10px;
+}
+
+/* Comps mini-map markers (report page). The outer element is MapLibre's; style the inner span. */
+.comp-pin {
+  text-decoration: none;
+}
+.comp-pin > span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font: 700 11px/1 var(--font-sans);
+  border: 2px solid var(--canvas);
+  box-shadow: 0 1px 6px rgb(0 0 0 / 0.5);
+  transition: transform 120ms ease-out, background-color 120ms;
+}
+.comp-pin:hover,
+.comp-pin.is-active {
+  z-index: 2;
+}
+.comp-pin:hover > span,
+.comp-pin.is-active > span {
+  transform: scale(1.25);
+  background: var(--brand-2);
+}
+.comp-pin-home > span {
+  width: 28px;
+  height: 28px;
+  background: var(--ink);
+  color: var(--canvas);
+  border-color: var(--brand);
+  font-size: 13px;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  letter-spacing: -0.02em;
+}
+
+/* Blueprint grid: the shared motif behind the intro, report identity and page heads. */
+.blueprint {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(ellipse 70% 55% at 85% 0%, rgb(146 122 255 / 0.09), transparent 70%),
+    linear-gradient(to right, rgb(67 217 230 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(67 217 230 / 0.06) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
+}
