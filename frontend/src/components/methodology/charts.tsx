@@ -6,9 +6,9 @@ import type { Stats } from "@/lib/api/schemas";
 import { homeTypeLabel, pctFromFraction } from "@/lib/format";
 import { C } from "@/lib/palette";
 
-const GREY = "#b9b5aa";
+const GREY = "#7d8aa1";
 
-/** Horizontal MAPE bars, lowest first. The Zestimate is grey (a reference, not a competitor); the published row is forest. */
+/** Horizontal MAPE bars, lowest first. The Zestimate is grey (a reference, not a competitor); the published row is brand. */
 export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stats["leaderboard"]; published: string | null }) {
   const rows = Object.entries(leaderboard)
     .map(([name, v]) => ({ name, mape: v.MAPE_zestimate_rows ?? v.MAPE ?? null }))
@@ -29,8 +29,8 @@ export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stat
               </span>
               <div className="h-3 rounded-r-[4px] bg-transparent">
                 <div
-                  className={clsx("h-full rounded-r-[4px] transition-opacity group-hover:opacity-80", bench && "bg-[repeating-linear-gradient(135deg,#b9b5aa_0_3px,#d9d5ca_3px_6px)]")}
-                  style={{ width: `${(r.mape / max) * 100}%`, background: bench ? undefined : pub ? C.forest : C.sage }}
+                  className={clsx("h-full rounded-r-[4px] transition-opacity group-hover:opacity-80", bench && "bg-[repeating-linear-gradient(135deg,#7d8aa1_0_3px,#2a3b58_3px_6px)]")}
+                  style={{ width: `${(r.mape / max) * 100}%`, background: bench ? undefined : pub ? C.brand : C.violet }}
                 />
               </div>
               <span className={clsx("tabular text-right text-[12.5px]", pub ? "font-semibold text-ink" : "text-ink-2")}>{r.mape.toFixed(2)}%</span>
@@ -39,8 +39,8 @@ export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stat
         })}
       </ul>
       <figcaption className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
-        <Key color={C.forest} label="Published fair price" />
-        <Key color={C.sage} label="Other models and ablations" />
+        <Key color={C.brand} label="Published fair price" />
+        <Key color={C.violet} label="Other models and ablations" />
         <Key color={GREY} label="Zestimate (reference)*" hatched />
         <span>MAPE on rows that have a Zestimate · lower is better</span>
       </figcaption>
@@ -59,7 +59,7 @@ export function CoverageChart({ raw, calibrated, target }: { raw: Record<string,
             <p className="mb-1.5 text-[13px] font-medium text-ink">{homeTypeLabel(t)}</p>
             {[
               { label: "Before", v: raw[t] ?? null, color: GREY },
-              { label: "After", v: calibrated[t] ?? null, color: C.forest },
+              { label: "After", v: calibrated[t] ?? null, color: C.brand },
             ].map((b) => (
               <div key={b.label} className="grid grid-cols-[3.5rem_1fr_3.5rem] items-center gap-3 py-0.5" title={`${homeTypeLabel(t)}, ${b.label.toLowerCase()} calibration: ${pctFromFraction(b.v)}`}>
                 <span className="text-[12px] text-ink-3">{b.label}</span>
@@ -75,7 +75,7 @@ export function CoverageChart({ raw, calibrated, target }: { raw: Record<string,
       </div>
       <figcaption className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
         <Key color={GREY} label="Raw q10–q90" />
-        <Key color={C.forest} label="Calibrated" />
+        <Key color={C.brand} label="Calibrated" />
         <span className="inline-flex items-center gap-1.5">
           <span className="h-3 w-0.5 bg-ink" aria-hidden /> {pctFromFraction(target, 0)} target
         </span>
@@ -129,10 +129,10 @@ export function LineChart({
           </g>
         ))}
         <line x1={P.l} x2={W - P.r} y1={H - P.b} y2={H - P.b} stroke={C.line} />
-        {connect && <polyline fill="none" stroke={C.forest} strokeWidth="2" strokeLinejoin="round" points={points.map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")} />}
+        {connect && <polyline fill="none" stroke={C.brand} strokeWidth="2" strokeLinejoin="round" points={points.map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")} />}
         {points.map((p, i) => (
           <g key={i}>
-            <circle cx={sx(p.x)} cy={sy(p.y)} r={i === best ? 5 : 4} fill={i === best ? C.forest : connect ? C.surface : C.sage} stroke={connect || i === best ? C.forest : C.surface} strokeWidth="2" />
+            <circle cx={sx(p.x)} cy={sy(p.y)} r={i === best ? 5 : 4} fill={i === best ? C.brand : connect ? C.surface : C.violet} stroke={connect || i === best ? C.brand : C.surface} strokeWidth="2" />
             <rect x={sx(p.x) - 9} y={P.t} width="18" height={H - P.t - P.b} fill="transparent" onMouseEnter={() => setHover(i)} />
           </g>
         ))}
@@ -162,7 +162,7 @@ function Key({ color, label, hatched }: { color: string; label: string; hatched?
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className={clsx("h-2.5 w-3.5 rounded-sm", hatched && "bg-[repeating-linear-gradient(135deg,#b9b5aa_0_2px,#d9d5ca_2px_4px)]")}
+        className={clsx("h-2.5 w-3.5 rounded-sm", hatched && "bg-[repeating-linear-gradient(135deg,#a9b6c4_0_2px,#d6dfe8_2px_4px)]")}
         style={hatched ? undefined : { background: color }}
         aria-hidden
       />

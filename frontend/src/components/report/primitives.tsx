@@ -3,8 +3,8 @@ import { CircleCheck, CircleHelp, Minus, TriangleAlert } from "lucide-react";
 import type { SignalStatus } from "@/lib/api/schemas";
 
 const STATUS = {
-  ok: { icon: CircleCheck, text: "OK", cls: "border-forest/25 bg-sage-soft text-forest" },
-  warning: { icon: TriangleAlert, text: "Warning", cls: "border-ochre/35 bg-ochre-soft text-ochre-ink" },
+  ok: { icon: CircleCheck, text: "OK", cls: "border-brand/25 bg-brand-soft text-brand" },
+  warning: { icon: TriangleAlert, text: "Warning", cls: "border-amber/35 bg-amber-soft text-amber-ink" },
   unknown: { icon: Minus, text: "Unknown", cls: "border-line bg-surface-2 text-ink-3" },
 } as const;
 

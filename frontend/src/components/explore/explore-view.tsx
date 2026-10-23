@@ -100,7 +100,7 @@ export function ExploreView() {
         aria-label="Search and results"
       >
         <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-24 pt-4 sm:px-5 lg:pb-6">
-          <h1 className="font-display text-[28px] leading-tight tracking-tight text-ink">Explore Houston listings</h1>
+          <h1 className="font-display font-semibold text-[28px] leading-tight tracking-tight text-ink">Explore Houston listings</h1>
           <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
             Asking prices compared with a model estimate and its calibrated range. Open any result for its full report.
           </p>

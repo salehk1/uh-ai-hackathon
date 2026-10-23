@@ -27,7 +27,7 @@ export const ListingCard = forwardRef<
       onMouseLeave={() => onHover(null)}
       className={clsx(
         "group relative rounded-2xl border bg-surface transition-[border-color,box-shadow,transform] duration-150",
-        active ? "border-forest shadow-md ring-1 ring-forest/30" : hovered ? "border-line-strong shadow-md" : "border-line shadow-sm",
+        active ? "border-brand shadow-md ring-1 ring-brand/30" : hovered ? "border-line-strong shadow-md" : "border-line shadow-sm",
       )}
     >
       <button
@@ -67,7 +67,7 @@ export const ListingCard = forwardRef<
       <Link
         href={`/property/${h.zpid}`}
         onClick={onOpen}
-        className="absolute bottom-3 right-3 inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[12px] font-medium text-forest opacity-90 transition-[background-color,opacity] duration-150 hover:bg-sage-tint group-hover:opacity-100"
+        className="absolute bottom-3 right-3 inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[12px] font-medium text-brand opacity-90 transition-[background-color,opacity] duration-150 hover:bg-brand-tint group-hover:opacity-100"
       >
         Report <ArrowUpRight className="size-3.5" aria-hidden />
       </Link>

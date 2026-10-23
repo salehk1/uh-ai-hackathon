@@ -137,7 +137,7 @@ export function EstimateView() {
 
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-8 sm:px-6">
-      <h1 className="font-display text-[36px] leading-tight tracking-tight text-ink">Estimate a home</h1>
+      <h1 className="font-display font-semibold text-[36px] leading-tight tracking-tight text-ink">Estimate a home</h1>
       <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-ink-2">
         Describe a hypothetical Houston home to get a model estimate of its 2024 list price, a calibrated range and the price receipt.
         Leave school rating and lot size blank to use the neighborhood&apos;s typical values.
@@ -190,7 +190,7 @@ export function EstimateView() {
                   onLoad={(m) => {
                     mapRef.current = m;
                     const el = document.createElement("div");
-                    el.innerHTML = `<svg width="28" height="36" viewBox="0 0 28 36" aria-hidden="true"><path d="M14 35s11-11.4 11-20A11 11 0 0 0 3 15c0 8.6 11 20 11 20Z" fill="${C.forest}" stroke="#fff" stroke-width="2"/><circle cx="14" cy="15" r="4" fill="#fff"/></svg>`;
+                    el.innerHTML = `<svg width="28" height="36" viewBox="0 0 28 36" aria-hidden="true"><path d="M14 35s11-11.4 11-20A11 11 0 0 0 3 15c0 8.6 11 20 11 20Z" fill="${C.brand}" stroke="${C.canvas}" stroke-width="2"/><circle cx="14" cy="15" r="4" fill="${C.onBrand}"/></svg>`;
                     const marker = new Marker({ element: el, anchor: "bottom", draggable: true })
                       .setLngLat([Number(f.lon) || -95.4, Number(f.lat) || 29.8])
                       .addTo(m);
@@ -307,7 +307,7 @@ export function EstimateView() {
             ) : (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <Card className="flex min-h-[320px] flex-col items-center justify-center border-dashed p-8 text-center">
-                  <Calculator className="size-7 text-sage" aria-hidden />
+                  <Calculator className="size-7 text-violet" aria-hidden />
                   <p className="mt-3 text-sm font-medium text-ink">Your estimate and receipt will appear here</p>
                   <p className="mt-1 max-w-sm text-[13px] text-ink-3">
                     {predict.isPending ? "Running the model…" : "Fill in the home and press Estimate price."}
@@ -348,7 +348,7 @@ function Result({
         <dl className="mt-3 grid grid-cols-2 gap-4">
           <div>
             <dt className="text-xs font-medium text-ink-3">Model estimate</dt>
-            <dd className="tabular mt-1 text-[30px] font-semibold tracking-tight text-forest">{usd(d.pred_price)}</dd>
+            <dd className="tabular mt-1 text-[30px] font-semibold tracking-tight text-brand">{usd(d.pred_price)}</dd>
             <dd className="tabular text-xs text-ink-3">{perSqft(d.ppsf)} model estimate</dd>
           </div>
           <div>
@@ -385,7 +385,7 @@ function Result({
       <div className="space-y-3">
         <Notice icon={<Info className="size-4" />}>
           Location coefficients come from the nearest reference listing,{" "}
-          <Link href={`/property/${d.nearest_zpid}`} className="inline-flex items-center gap-0.5 font-medium text-forest underline-offset-2 hover:underline">
+          <Link href={`/property/${d.nearest_zpid}`} className="inline-flex items-center gap-0.5 font-medium text-brand underline-offset-2 hover:underline">
             listing {d.nearest_zpid}
             <ArrowUpRight className="size-3" aria-hidden />
           </Link>
@@ -432,10 +432,10 @@ function Check({ label, checked, onChange }: { label: ReactNode; checked: boolea
     <label
       className={clsx(
         "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-[13px] transition-colors",
-        checked ? "border-sage bg-sage-tint text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong",
+        checked ? "border-brand bg-brand-tint text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong",
       )}
     >
-      <input type="checkbox" className="size-4 accent-[var(--forest)]" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <input type="checkbox" className="size-4 accent-[var(--brand)]" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       {label}
     </label>
   );

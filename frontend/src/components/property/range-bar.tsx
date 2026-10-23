@@ -39,7 +39,7 @@ export function RangeBar({
       {/* track */}
       <div className="relative h-3 rounded-full bg-surface-2 ring-1 ring-line/80 ring-inset">
         <motion.div
-          className="absolute inset-y-0 rounded-full bg-sage-soft ring-1 ring-sage/60 ring-inset"
+          className="absolute inset-y-0 rounded-full bg-brand-soft ring-1 ring-brand/45 ring-inset"
           style={{ left: `${pct(q10)}%`, width: `${pct(q90) - pct(q10)}%`, originX: 0.5 }}
           initial={{ scaleX: 0.6, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}
@@ -47,7 +47,7 @@ export function RangeBar({
         />
         {/* estimate marker */}
         <motion.div
-          className="absolute top-1/2 z-10 size-3.5 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[3px] border-2 border-surface bg-forest shadow-sm"
+          className="absolute top-1/2 z-10 size-3.5 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[3px] border-2 border-surface bg-brand shadow-sm"
           style={{ left: `${pct(estimate)}%` }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -109,7 +109,7 @@ function Tag({
         place === "top" && "top-2",
         place === "bottom" && "top-[3.35rem]",
         place === "bottom-far" && "top-[4.6rem]",
-        strong ? "font-semibold text-ink" : muted ? "text-ink-3" : "font-medium text-forest",
+        strong ? "font-semibold text-ink" : muted ? "text-ink-3" : "font-medium text-brand",
       )}
       style={{ left: `${clamped}%` }}
     >

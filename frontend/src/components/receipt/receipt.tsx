@@ -8,10 +8,10 @@ import { signedUsd, signedUsdCompact, usd, usdCompact } from "@/lib/format";
 import { itemSum, reconciles, shortLabel, waterfall, type WaterfallStep } from "@/lib/receipt";
 
 const BAR: Record<WaterfallStep["kind"] | "neg", string> = {
-  baseline: "bg-sage",
-  feature: "bg-forest",
-  neg: "bg-ochre",
-  adjustment: "bg-[repeating-linear-gradient(135deg,#9a978c_0_3px,#c9c5b8_3px_6px)]",
+  baseline: "bg-violet",
+  feature: "bg-brand",
+  neg: "bg-slate",
+  adjustment: "bg-[repeating-linear-gradient(135deg,#6e86ab_0_3px,#2a3b58_3px_6px)]",
   total: "bg-ink",
 };
 
@@ -72,7 +72,7 @@ export function ReceiptWaterfall({
                 className={clsx(
                   "tabular text-right",
                   compact ? "text-[11.5px]" : "text-[13px]",
-                  s.kind === "total" ? "font-semibold text-ink" : s.kind === "baseline" ? "text-ink" : s.usd < 0 ? "text-ochre-ink" : "text-forest",
+                  s.kind === "total" ? "font-semibold text-ink" : s.kind === "baseline" ? "text-ink" : s.usd < 0 ? "text-slate-ink" : "text-brand",
                 )}
               >
                 {s.kind === "baseline" || s.kind === "total" ? usdCompact(s.usd) : signedUsdCompact(s.usd)}
@@ -83,9 +83,9 @@ export function ReceiptWaterfall({
       </div>
       {!compact && (
         <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-3">
-          <Legend className="bg-sage" label="Neighborhood baseline" />
-          <Legend className="bg-forest" label="Adds to price" />
-          <Legend className="bg-ochre" label="Reduces price" />
+          <Legend className="bg-violet" label="Neighborhood baseline" />
+          <Legend className="bg-brand" label="Adds to price" />
+          <Legend className="bg-slate" label="Reduces price" />
           <Legend className={BAR.adjustment} label="ML adjustment" />
           <Legend className="bg-ink" label={totalLabel} />
         </figcaption>
@@ -140,7 +140,7 @@ export function ReceiptTable({
                     </span>
                   )}
                 </th>
-                <td className={clsx("whitespace-nowrap py-2 pr-3 text-right", isBase ? "text-ink" : it.usd < 0 ? "text-ochre-ink" : "text-forest")}>
+                <td className={clsx("whitespace-nowrap py-2 pr-3 text-right", isBase ? "text-ink" : it.usd < 0 ? "text-slate-ink" : "text-brand")}>
                   {isBase ? usd(it.usd) : signedUsd(it.usd)}
                 </td>
                 {!compact && <td className="hidden whitespace-nowrap py-2 text-right text-ink-3 sm:table-cell">{usd(running[i])}</td>}
@@ -157,7 +157,7 @@ export function ReceiptTable({
         </tfoot>
       </table>
       <p className={clsx("mt-3 flex items-start gap-1.5 text-xs", ok ? "text-ink-3" : "text-danger")}>
-        {ok ? <CircleCheck className="mt-px size-3.5 shrink-0 text-forest" aria-hidden /> : <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden />}
+        {ok ? <CircleCheck className="mt-px size-3.5 shrink-0 text-brand" aria-hidden /> : <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden />}
         {ok
           ? `Line items sum to ${usd(sum)}, matching the ${totalLabel.toLowerCase()}. GWR subtotal before the ML adjustment: ${usd(receipt.gwr_price)}.`
           : `Line items sum to ${usd(sum)} but the stated total is ${usd(receipt.total)}. Shown as received; please report this listing.`}

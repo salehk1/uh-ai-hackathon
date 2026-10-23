@@ -15,9 +15,9 @@ type Row = { key: "mortgage" | "tax" | "hoa" | "insurance"; label: string; sub: 
 export function CostsSection({ costs }: { costs: Report["costs"] }) {
   const m = costs.monthly;
   const rows: Row[] = [
-    { key: "mortgage", label: "Mortgage", sub: "Principal + interest, 30-yr fixed, 20% down", value: m.mortgage, color: "bg-forest" },
-    { key: "tax", label: "Property tax", sub: "From the listed tax rate", value: m.tax, color: "bg-sage" },
-    { key: "hoa", label: "HOA", sub: "As disclosed in the listing", value: m.hoa, color: "bg-ochre" },
+    { key: "mortgage", label: "Mortgage", sub: "Principal + interest, 30-yr fixed, 20% down", value: m.mortgage, color: "bg-brand" },
+    { key: "tax", label: "Property tax", sub: "From the listed tax rate", value: m.tax, color: "bg-violet" },
+    { key: "hoa", label: "HOA", sub: "As disclosed in the listing", value: m.hoa, color: "bg-amber" },
     { key: "insurance", label: "Insurance", sub: "Homeowners policy", value: m.insurance, color: "bg-slate" },
   ];
   const known = rows.filter((r) => isKnown(r.value));
@@ -68,7 +68,7 @@ export function CostsSection({ costs }: { costs: Report["costs"] }) {
       <div className="grid gap-5">
         <Card className="p-5 sm:p-6">
           <h3 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
-            <ListChecks className="size-4 text-forest" aria-hidden /> Assumptions
+            <ListChecks className="size-4 text-brand" aria-hidden /> Assumptions
           </h3>
           <List items={costs.assumptions} empty="No assumptions were returned." />
         </Card>

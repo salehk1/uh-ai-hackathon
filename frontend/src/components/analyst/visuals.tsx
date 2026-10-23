@@ -23,7 +23,7 @@ export function VisualView({ v }: { v: ChatVisual }) {
           <figcaption className="mb-3 flex items-center justify-between gap-2 text-[12px] text-ink-3">
             <span>{v.source === "listing" ? `Price receipt · Listing ${v.zpid}` : "Price receipt · hypothetical home"}</span>
             {v.zpid !== null && (
-              <Link href={`/property/${v.zpid}`} className="inline-flex items-center gap-0.5 font-medium text-forest hover:underline">
+              <Link href={`/property/${v.zpid}`} className="inline-flex items-center gap-0.5 font-medium text-brand hover:underline">
                 Report <ArrowUpRight className="size-3" aria-hidden />
               </Link>
             )}
@@ -72,7 +72,7 @@ function PointsVisual({ points, dropped }: { points: MapPoint[]; dropped: number
         {points.length.toLocaleString("en-US")} listing{points.length === 1 ? "" : "s"} plotted by location
         {dropped > 0 && ` · ${dropped} skipped (invalid coordinates)`}
       </figcaption>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl bg-sage-tint" role="img" aria-label={`Location plot of ${points.length} listings`}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-xl bg-brand-tint" role="img" aria-label={`Location plot of ${points.length} listings`}>
         {points.map((p, i) => (
           <circle
             key={i}
@@ -80,7 +80,7 @@ function PointsVisual({ points, dropped }: { points: MapPoint[]; dropped: number
             cy={H - (oy + (p.lat - y0) * s)}
             r={points.length > 300 ? 2 : 4}
             fill={p.label ? VERDICT_COLOR[p.label] : C.neutral}
-            stroke="#fff"
+            stroke={C.canvas}
             strokeWidth={points.length > 300 ? 0.3 : 1}
             opacity={0.9}
           />
@@ -90,7 +90,7 @@ function PointsVisual({ points, dropped }: { points: MapPoint[]; dropped: number
         <ul className="mt-2.5 divide-y divide-line">
           {linked.map((p) => (
             <li key={p.zpid}>
-              <Link href={`/property/${p.zpid}`} className="flex items-center gap-2 rounded-lg px-1.5 py-1.5 text-[12.5px] hover:bg-sage-tint">
+              <Link href={`/property/${p.zpid}`} className="flex items-center gap-2 rounded-lg px-1.5 py-1.5 text-[12.5px] hover:bg-brand-tint">
                 <span className="tabular font-semibold text-ink">{usdCompact(p.price)}</span>
                 <span className="flex-1 truncate text-ink-3">ZIP {p.zipcode ?? "unknown"} · Listing {p.zpid}</span>
                 <VerdictBadge label={p.label} size="sm" />
@@ -123,7 +123,7 @@ function BarVisual({ labels, series }: { labels: string[]; series: { name: strin
                       </th>
                       <td className="py-1">
                         <div className="h-2.5 rounded-full bg-surface-2">
-                          {v !== null && max > 0 && <div className="h-full rounded-full bg-forest" style={{ width: `${Math.max(2, (v / max) * 100)}%` }} />}
+                          {v !== null && max > 0 && <div className="h-full rounded-full bg-brand" style={{ width: `${Math.max(2, (v / max) * 100)}%` }} />}
                         </div>
                       </td>
                       <td className="w-20 py-1 pl-2 text-right text-ink">{v === null ? "n/a" : v.toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
@@ -157,7 +157,7 @@ function ReportCard({ report: r }: { report: Report }) {
         </div>
         <Link
           href={`/property/${l.zpid}`}
-          className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-forest px-2.5 py-1 text-[11.5px] font-medium text-white hover:bg-forest-2"
+          className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-brand px-2.5 py-1 text-[11.5px] font-medium text-on-brand hover:bg-brand-2"
         >
           Full report <ArrowUpRight className="size-3" aria-hidden />
         </Link>

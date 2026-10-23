@@ -1,39 +1,46 @@
-/** Literal colors for canvas/SVG contexts that can't read CSS variables (MapLibre paint, chart fills). */
+/** Literal colors for canvas/SVG contexts that can't read CSS variables (MapLibre paint, chart fills). Mirrors globals.css. */
 export const C = {
-  ink: "#1d221f",
-  ink3: "#626a63",
-  line: "#e2ddd0",
-  surface: "#ffffff",
-  forest: "#2e5a45",
-  sage: "#8fae96",
-  sageSoft: "#e3ece4",
-  ochre: "#b98535",
-  ochreSoft: "#f6ead3",
-  slate: "#4f6d8a",
-  slateSoft: "#e3eaf1",
-  neutral: "#b8b3a4",
-  vLow: "#3a6ea5",
-  vExpected: "#9a9d96",
-  vHigh: "#b8483b",
+  ink: "#f2f6ff",
+  ink2: "#aabad1",
+  ink3: "#8c9db8",
+  line: "#304361",
+  lineStrong: "#4a6089",
+  surface: "#121d33",
+  surface2: "#1a2943",
+  canvas: "#090f1f",
+  sky: "#0d1830",
+  brand: "#43d9e6",
+  brand2: "#86e8f0",
+  onBrand: "#061219",
+  violet: "#927aff",
+  brandSoft: "#103041",
+  amber: "#e9a23b",
+  amberSoft: "#2c2414",
+  slate: "#6e86ab",
+  slateSoft: "#1c2a42",
+  neutral: "#5d6f8c",
+  vLow: "#4f8dff",
+  vExpected: "#8f9bb0",
+  vHigh: "#f2645c",
 } as const;
 
 /** Verdict colors. Always paired with text/icons; never the only cue. */
 export const VERDICT_COLOR = { high: C.vHigh, low: C.vLow, expected: C.vExpected } as const;
 
-/** Diverging stops for residual_pct (fraction): below estimate → blue, near → grey, above → red. */
+/** Diverging stops for residual_pct (fraction): below estimate → blue, near → grey, above → red. Ends brightest on the dark map. */
 export const RESIDUAL_STOPS: [number, string][] = [
-  [-0.3, "#2b5689"],
-  [-0.12, "#7fa3cb"],
-  [0, "#c9cac4"],
-  [0.12, "#d98f83"],
-  [0.3, "#93342a"],
+  [-0.3, "#3d7bff"],
+  [-0.12, "#7fa6ee"],
+  [0, "#8f9bb0"],
+  [0.12, "#ef9087"],
+  [0.3, "#ff5548"],
 ];
 
-/** Sequential stops for asking $/sqft. */
+/** Sequential stops for asking $/sqft (single cyan hue, dim → bright on the dark map). */
 export const PPSF_STOPS: [number, string][] = [
-  [100, "#e3ece4"],
-  [175, "#b4cdb9"],
-  [250, "#7fa48a"],
-  [350, "#4e7c62"],
-  [500, "#24483a"],
+  [100, "#2f6690"],
+  [175, "#2b8aa8"],
+  [250, "#33b2c8"],
+  [350, "#43d9e6"],
+  [500, "#b8f5fa"],
 ];

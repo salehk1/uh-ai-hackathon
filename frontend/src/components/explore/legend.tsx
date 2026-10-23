@@ -64,7 +64,7 @@ export function MapLegend({
       </div>
       <dl className="mt-3 space-y-1 border-t border-line pt-2.5 text-[11.5px] leading-snug text-ink-3">
         <div className="flex items-start gap-2">
-          <span className="mt-1 size-2 shrink-0 rounded-full bg-sage ring-1 ring-white" aria-hidden />
+          <span className="mt-1 size-2 shrink-0 rounded-full bg-violet ring-1 ring-canvas" aria-hidden />
           <dd>
             {sampleState === "loading"
               ? "Loading listing sample…"
@@ -74,7 +74,7 @@ export function MapLegend({
           </dd>
         </div>
         <div className="flex items-start gap-2">
-          <span className="mt-0.5 flex size-3 shrink-0 items-center justify-center rounded-full border-2 border-white bg-ink/70 ring-1 ring-ink/30" aria-hidden />
+          <span className="mt-0.5 flex size-3 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-v-expected ring-1 ring-canvas" aria-hidden />
           <dd>Numbered: your {resultCount} matching result{resultCount === 1 ? "" : "s"} (up to 20).</dd>
         </div>
       </dl>

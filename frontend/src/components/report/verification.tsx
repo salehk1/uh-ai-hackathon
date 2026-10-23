@@ -30,7 +30,7 @@ export function VerificationSection({ signals }: { signals: Signal[] }) {
                     {s.related_zpids.map((z, i) => (
                       <span key={z}>
                         {i > 0 && ", "}
-                        <Link href={`/property/${z}`} className="tabular font-medium text-forest underline underline-offset-2">
+                        <Link href={`/property/${z}`} className="tabular font-medium text-brand underline underline-offset-2">
                           listing {z}
                         </Link>
                       </span>

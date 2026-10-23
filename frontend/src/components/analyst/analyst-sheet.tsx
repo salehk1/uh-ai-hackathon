@@ -71,7 +71,7 @@ export function AnalystSheet() {
       {a.open && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-ink/15 backdrop-blur-[1px]"
+            className="fixed inset-0 z-50 bg-canvas/60 backdrop-blur-[1px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -90,7 +90,7 @@ export function AnalystSheet() {
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="flex items-center gap-2 border-b border-line px-4 py-3">
-              <MessageSquareText className="size-4.5 text-forest" aria-hidden />
+              <MessageSquareText className="size-4.5 text-brand" aria-hidden />
               <div className="min-w-0 flex-1">
                 <h2 id="analyst-title" className="text-[15px] font-semibold text-ink">
                   Housing analyst
@@ -147,7 +147,7 @@ export function AnalystSheet() {
               </ol>
               {a.busy && (
                 <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-3.5 py-3 text-[13px] text-ink-2 shadow-sm">
-                  <LoaderCircle className="size-4 animate-spin text-forest" aria-hidden />
+                  <LoaderCircle className="size-4 animate-spin text-brand" aria-hidden />
                   <span className="flex-1">Working on it. The analyst may run several tools first.</span>
                   <Button size="sm" variant="ghost" onClick={a.cancel}>
                     <Square className="size-3" aria-hidden /> Cancel
@@ -166,7 +166,7 @@ export function AnalystSheet() {
             >
               {a.contextZpid && (
                 <div className="mb-2 flex items-center gap-2 text-[11.5px] text-ink-3">
-                  <span className="rounded-full bg-sage-soft px-2 py-0.5 font-medium text-forest">Listing {a.contextZpid}</span>
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 font-medium text-brand">Listing {a.contextZpid}</span>
                   <span>in context. Your prompt includes the id.</span>
                   <button type="button" className="ml-auto underline underline-offset-2 hover:text-ink" onClick={() => a.setContextZpid(null)}>
                     Remove
@@ -191,7 +191,7 @@ export function AnalystSheet() {
                     }
                   }}
                   placeholder="Ask about a listing, ZIP code or the model…"
-                  className="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink shadow-sm focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/15"
+                  className="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15"
                 />
                 <Button type="submit" variant="primary" className="size-11 shrink-0 px-0" disabled={!a.draft.trim() || a.busy} aria-label="Send">
                   <Send className="size-4" aria-hidden />
@@ -209,7 +209,7 @@ function MessageView({ m }: { m: Message }) {
   if (m.role === "user") {
     return (
       <li className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-forest px-3.5 py-2.5 text-[13.5px] leading-relaxed text-white">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-brand px-3.5 py-2.5 text-[13.5px] leading-relaxed text-on-brand">
           {m.content}
         </p>
       </li>
