@@ -16,7 +16,7 @@ export function CostsSection({ costs }: { costs: Report["costs"] }) {
   const m = costs.monthly;
   const rows: Row[] = [
     { key: "mortgage", label: "Mortgage", sub: "Principal + interest, 30-yr fixed, 20% down", value: m.mortgage, color: "bg-brand" },
-    { key: "tax", label: "Property tax", sub: "From the listed tax rate", value: m.tax, color: "bg-mint" },
+    { key: "tax", label: "Property tax", sub: "From the listed tax rate", value: m.tax, color: "bg-violet" },
     { key: "hoa", label: "HOA", sub: "As disclosed in the listing", value: m.hoa, color: "bg-amber" },
     { key: "insurance", label: "Insurance", sub: "Homeowners policy", value: m.insurance, color: "bg-slate" },
   ];

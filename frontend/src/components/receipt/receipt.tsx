@@ -8,10 +8,10 @@ import { signedUsd, signedUsdCompact, usd, usdCompact } from "@/lib/format";
 import { itemSum, reconciles, shortLabel, waterfall, type WaterfallStep } from "@/lib/receipt";
 
 const BAR: Record<WaterfallStep["kind"] | "neg", string> = {
-  baseline: "bg-mint",
+  baseline: "bg-violet",
   feature: "bg-brand",
   neg: "bg-slate",
-  adjustment: "bg-[repeating-linear-gradient(135deg,#7f95ab_0_3px,#c9d6e3_3px_6px)]",
+  adjustment: "bg-[repeating-linear-gradient(135deg,#6e86ab_0_3px,#2a3b58_3px_6px)]",
   total: "bg-ink",
 };
 
@@ -83,7 +83,7 @@ export function ReceiptWaterfall({
       </div>
       {!compact && (
         <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink-3">
-          <Legend className="bg-mint" label="Neighborhood baseline" />
+          <Legend className="bg-violet" label="Neighborhood baseline" />
           <Legend className="bg-brand" label="Adds to price" />
           <Legend className="bg-slate" label="Reduces price" />
           <Legend className={BAR.adjustment} label="ML adjustment" />

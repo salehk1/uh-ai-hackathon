@@ -525,7 +525,7 @@ function Section({
     >
       <div className="flex items-start gap-3.5">
         {step !== undefined && (
-          <span className="tabular mt-5 grid h-8 shrink-0 place-items-center rounded-[9px] bg-ink px-2 font-display text-[13px] font-bold text-white" aria-hidden>
+          <span className="tabular mt-5 grid h-8 shrink-0 place-items-center rounded-[9px] bg-ink px-2 font-display text-[13px] font-bold text-canvas" aria-hidden>
             0{step}
           </span>
         )}

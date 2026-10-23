@@ -71,7 +71,7 @@ export function AnalystSheet() {
       {a.open && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-ink/15 backdrop-blur-[1px]"
+            className="fixed inset-0 z-50 bg-canvas/60 backdrop-blur-[1px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -209,7 +209,7 @@ function MessageView({ m }: { m: Message }) {
   if (m.role === "user") {
     return (
       <li className="flex justify-end">
-        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-brand px-3.5 py-2.5 text-[13.5px] leading-relaxed text-white">
+        <p className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-brand px-3.5 py-2.5 text-[13.5px] leading-relaxed text-on-brand">
           {m.content}
         </p>
       </li>

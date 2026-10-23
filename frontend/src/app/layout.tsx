@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "A due-diligence report for a Houston listing: is the price reasonable, does the listing check out, and what will it cost per month?",
 };
 
-export const viewport: Viewport = { themeColor: "#f3f7fc", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#090f1f", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="flex h-dvh flex-col overflow-hidden">
         <a
           href="#main"
-          className="sr-only z-50 rounded-[10px] bg-brand px-4 py-2 text-sm text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-3"
+          className="sr-only z-50 rounded-[10px] bg-brand px-4 py-2 text-sm text-on-brand focus:not-sr-only focus:fixed focus:left-4 focus:top-3"
         >
           Skip to content
         </a>

@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 import { prefetchExplore } from "@/lib/api/queries";
 import { readStorage, useBrowserValue } from "@/lib/use-browser-value";
 import { BaseMap } from "../map/base-map";
-import { Logo } from "../logo";
 import { Button } from "../ui";
 
 const SKIP_KEY = "hpr:skip-intro";
@@ -68,16 +67,13 @@ export function IntroView() {
           };
         }}
       />
-      {/* cool wash on the text side only; the map stays clear on the right */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(243_247_252/0.92)_0%,rgb(243_247_252/0.6)_38%,rgb(215_234_246/0)_62%)] max-md:bg-[linear-gradient(0deg,rgb(243_247_252/0.96)_0%,rgb(243_247_252/0.82)_48%,rgb(215_234_246/0)_82%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(215_234_246/0.7),transparent)]" />
+      {/* midnight scrim on the text side only; the map stays clear on the right */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(9_15_31/0.92)_0%,rgb(9_15_31/0.6)_36%,rgb(9_15_31/0)_58%)] max-md:bg-[linear-gradient(0deg,rgb(9_15_31/0.97)_0%,rgb(9_15_31/0.85)_48%,rgb(9_15_31/0)_82%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(9_15_31/0.8),transparent)]" />
 
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 pt-4 sm:px-10 sm:pt-6">
-        <span className="flex items-center gap-2.5">
-          <Logo className="size-8" />
-          <span className="font-display text-[17px] font-bold tracking-tight text-ink">
-            Quant<span className="text-brand">House</span>
-          </span>
+        <span className="font-display text-[17px] font-bold tracking-tight text-ink">
+          Quant<span className="text-brand">House</span>
         </span>
         <Button variant="secondary" size="sm" onClick={go} className="bg-surface/90 backdrop-blur">
           Skip intro
@@ -91,18 +87,9 @@ export function IntroView() {
           transition={{ duration: 0.45, delay: reduced ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-[38rem]"
         >
-          <p className="flex items-center gap-2 text-[13px] font-semibold text-brand">
-            <span className="h-px w-6 bg-brand/60" aria-hidden />
-            Houston · 2024 listings
-          </p>
-          <h1 className="mt-4 font-display text-[46px] font-bold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[76px]">
-            Know the house
-            <br />
-            <span className="text-brand">before the offer.</span>
+          <h1 className="font-display text-[46px] font-bold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[76px]">
+            Quant<span className="text-brand">House</span>
           </h1>
-          <p className="mt-5 max-w-[32rem] text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
-            One due-diligence report for any Houston listing. Three separate answers, each with its own evidence.
-          </p>
           <ol className="mt-6 grid max-w-[32rem] gap-2 sm:grid-cols-3">
             {QUESTIONS.map((q, i) => (
               <li key={q} className="flex items-baseline gap-2 rounded-[12px] border border-line bg-surface/85 px-3 py-2.5 backdrop-blur">

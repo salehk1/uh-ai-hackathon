@@ -39,7 +39,7 @@ export function RangeBar({
       {/* track */}
       <div className="relative h-3 rounded-full bg-surface-2 ring-1 ring-line/80 ring-inset">
         <motion.div
-          className="absolute inset-y-0 rounded-full bg-brand-soft ring-1 ring-mint/60 ring-inset"
+          className="absolute inset-y-0 rounded-full bg-brand-soft ring-1 ring-brand/45 ring-inset"
           style={{ left: `${pct(q10)}%`, width: `${pct(q90) - pct(q10)}%`, originX: 0.5 }}
           initial={{ scaleX: 0.6, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}

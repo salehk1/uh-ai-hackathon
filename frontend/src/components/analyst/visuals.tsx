@@ -80,7 +80,7 @@ function PointsVisual({ points, dropped }: { points: MapPoint[]; dropped: number
             cy={H - (oy + (p.lat - y0) * s)}
             r={points.length > 300 ? 2 : 4}
             fill={p.label ? VERDICT_COLOR[p.label] : C.neutral}
-            stroke="#fff"
+            stroke={C.canvas}
             strokeWidth={points.length > 300 ? 0.3 : 1}
             opacity={0.9}
           />
@@ -157,7 +157,7 @@ function ReportCard({ report: r }: { report: Report }) {
         </div>
         <Link
           href={`/property/${l.zpid}`}
-          className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-brand px-2.5 py-1 text-[11.5px] font-medium text-white hover:bg-brand-2"
+          className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-brand px-2.5 py-1 text-[11.5px] font-medium text-on-brand hover:bg-brand-2"
         >
           Full report <ArrowUpRight className="size-3" aria-hidden />
         </Link>

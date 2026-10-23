@@ -84,10 +84,10 @@ export function ExploreMap(p: Props) {
       source: "sample",
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": C.mint,
-        "circle-opacity": 0.28,
-        "circle-stroke-color": C.mint,
-        "circle-stroke-opacity": 0.6,
+        "circle-color": C.violet,
+        "circle-opacity": 0.22,
+        "circle-stroke-color": C.violet,
+        "circle-stroke-opacity": 0.7,
         "circle-stroke-width": 1,
         "circle-radius": ["step", ["get", "point_count"], 12, 25, 15, 100, 19, 300, 24],
       },
@@ -98,7 +98,7 @@ export function ExploreMap(p: Props) {
       source: "sample",
       filter: ["has", "point_count"],
       layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["Noto Sans Regular"], "text-size": 10.5 },
-      paint: { "text-color": C.ink3 },
+      paint: { "text-color": C.ink2 },
     });
     m.addLayer({
       id: "sample-points",
@@ -109,7 +109,7 @@ export function ExploreMap(p: Props) {
         "circle-color": colorExpr(handlers.current.metric),
         "circle-radius": ["interpolate", ["linear"], ["zoom"], 9, 3, 13, 5.5, 16, 8],
         "circle-opacity": 0.88,
-        "circle-stroke-color": ["case", ["boolean", ["feature-state", "selected"], false], C.ink, ["boolean", ["feature-state", "hover"], false], C.ink, "#ffffff"],
+        "circle-stroke-color": ["case", ["boolean", ["feature-state", "selected"], false], C.brand, ["boolean", ["feature-state", "hover"], false], C.ink, C.canvas],
         "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 2.5, ["boolean", ["feature-state", "hover"], false], 2, 0.8],
       },
     });
@@ -119,8 +119,8 @@ export function ExploreMap(p: Props) {
       source: "results",
       paint: {
         "circle-radius": ["case", ["boolean", ["feature-state", "hover"], false], 17, ["boolean", ["feature-state", "selected"], false], 17, 13],
-        "circle-color": C.ink,
-        "circle-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.16, ["boolean", ["feature-state", "hover"], false], 0.12, 0],
+        "circle-color": C.brand,
+        "circle-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 0.32, ["boolean", ["feature-state", "hover"], false], 0.18, 0],
         "circle-radius-transition": { duration: 150 },
       },
     });
@@ -131,7 +131,7 @@ export function ExploreMap(p: Props) {
       paint: {
         "circle-color": colorExpr(handlers.current.metric),
         "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 12, 10],
-        "circle-stroke-color": C.ink,
+        "circle-stroke-color": ["case", ["boolean", ["feature-state", "selected"], false], C.brand, C.ink],
         "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 3.5, 2],
       },
     });
@@ -146,7 +146,7 @@ export function ExploreMap(p: Props) {
         "text-allow-overlap": true,
         "text-ignore-placement": true,
       },
-      paint: { "text-color": C.ink, "text-halo-color": "rgba(255,255,255,0.85)", "text-halo-width": 1.2 },
+      paint: { "text-color": C.ink, "text-halo-color": "rgba(9,15,31,0.9)", "text-halo-width": 1.4 },
     });
 
     const zpidOf = (f: MapGeoJSONFeature | undefined) => (f?.properties?.zpid !== undefined ? Number(f.properties.zpid) : null);

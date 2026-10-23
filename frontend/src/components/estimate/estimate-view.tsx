@@ -190,7 +190,7 @@ export function EstimateView() {
                   onLoad={(m) => {
                     mapRef.current = m;
                     const el = document.createElement("div");
-                    el.innerHTML = `<svg width="28" height="36" viewBox="0 0 28 36" aria-hidden="true"><path d="M14 35s11-11.4 11-20A11 11 0 0 0 3 15c0 8.6 11 20 11 20Z" fill="${C.brand}" stroke="#fff" stroke-width="2"/><circle cx="14" cy="15" r="4" fill="#fff"/></svg>`;
+                    el.innerHTML = `<svg width="28" height="36" viewBox="0 0 28 36" aria-hidden="true"><path d="M14 35s11-11.4 11-20A11 11 0 0 0 3 15c0 8.6 11 20 11 20Z" fill="${C.brand}" stroke="${C.canvas}" stroke-width="2"/><circle cx="14" cy="15" r="4" fill="${C.onBrand}"/></svg>`;
                     const marker = new Marker({ element: el, anchor: "bottom", draggable: true })
                       .setLngLat([Number(f.lon) || -95.4, Number(f.lat) || 29.8])
                       .addTo(m);
@@ -307,7 +307,7 @@ export function EstimateView() {
             ) : (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <Card className="flex min-h-[320px] flex-col items-center justify-center border-dashed p-8 text-center">
-                  <Calculator className="size-7 text-mint" aria-hidden />
+                  <Calculator className="size-7 text-violet" aria-hidden />
                   <p className="mt-3 text-sm font-medium text-ink">Your estimate and receipt will appear here</p>
                   <p className="mt-1 max-w-sm text-[13px] text-ink-3">
                     {predict.isPending ? "Running the model…" : "Fill in the home and press Estimate price."}
@@ -432,7 +432,7 @@ function Check({ label, checked, onChange }: { label: ReactNode; checked: boolea
     <label
       className={clsx(
         "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-[13px] transition-colors",
-        checked ? "border-mint bg-brand-tint text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong",
+        checked ? "border-brand bg-brand-tint text-ink" : "border-line bg-surface text-ink-2 hover:border-line-strong",
       )}
     >
       <input type="checkbox" className="size-4 accent-[var(--brand)]" checked={checked} onChange={(e) => onChange(e.target.checked)} />

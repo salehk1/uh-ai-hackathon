@@ -6,7 +6,7 @@ import type { Stats } from "@/lib/api/schemas";
 import { homeTypeLabel, pctFromFraction } from "@/lib/format";
 import { C } from "@/lib/palette";
 
-const GREY = "#a9b6c4";
+const GREY = "#7d8aa1";
 
 /** Horizontal MAPE bars, lowest first. The Zestimate is grey (a reference, not a competitor); the published row is brand. */
 export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stats["leaderboard"]; published: string | null }) {
@@ -29,8 +29,8 @@ export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stat
               </span>
               <div className="h-3 rounded-r-[4px] bg-transparent">
                 <div
-                  className={clsx("h-full rounded-r-[4px] transition-opacity group-hover:opacity-80", bench && "bg-[repeating-linear-gradient(135deg,#a9b6c4_0_3px,#d6dfe8_3px_6px)]")}
-                  style={{ width: `${(r.mape / max) * 100}%`, background: bench ? undefined : pub ? C.brand : C.mint }}
+                  className={clsx("h-full rounded-r-[4px] transition-opacity group-hover:opacity-80", bench && "bg-[repeating-linear-gradient(135deg,#7d8aa1_0_3px,#2a3b58_3px_6px)]")}
+                  style={{ width: `${(r.mape / max) * 100}%`, background: bench ? undefined : pub ? C.brand : C.violet }}
                 />
               </div>
               <span className={clsx("tabular text-right text-[12.5px]", pub ? "font-semibold text-ink" : "text-ink-2")}>{r.mape.toFixed(2)}%</span>
@@ -40,7 +40,7 @@ export function LeaderboardChart({ leaderboard, published }: { leaderboard: Stat
       </ul>
       <figcaption className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3">
         <Key color={C.brand} label="Published fair price" />
-        <Key color={C.mint} label="Other models and ablations" />
+        <Key color={C.violet} label="Other models and ablations" />
         <Key color={GREY} label="Zestimate (reference)*" hatched />
         <span>MAPE on rows that have a Zestimate · lower is better</span>
       </figcaption>
@@ -132,7 +132,7 @@ export function LineChart({
         {connect && <polyline fill="none" stroke={C.brand} strokeWidth="2" strokeLinejoin="round" points={points.map((p) => `${sx(p.x)},${sy(p.y)}`).join(" ")} />}
         {points.map((p, i) => (
           <g key={i}>
-            <circle cx={sx(p.x)} cy={sy(p.y)} r={i === best ? 5 : 4} fill={i === best ? C.brand : connect ? C.surface : C.mint} stroke={connect || i === best ? C.brand : C.surface} strokeWidth="2" />
+            <circle cx={sx(p.x)} cy={sy(p.y)} r={i === best ? 5 : 4} fill={i === best ? C.brand : connect ? C.surface : C.violet} stroke={connect || i === best ? C.brand : C.surface} strokeWidth="2" />
             <rect x={sx(p.x) - 9} y={P.t} width="18" height={H - P.t - P.b} fill="transparent" onMouseEnter={() => setHover(i)} />
           </g>
         ))}
