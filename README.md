@@ -16,6 +16,92 @@ evidence and no invented confidence scores. Where evidence is missing, the answe
 An LLM agent (Qwen3-32B on Featherless) can run any of this through tools and return maps,
 charts and reports.
 
+## Setup, deployment and current status (read this first)
+
+### Architecture
+
+```
+browser ──https──▶ quanthouse.casa (Fly.io app "quanthouse", 1 machine, dfw)
+                   ├─ Next.js frontend  :8080 public    frontend/   (Saleh)
+                   │    /api/*      → adapter routes, proxy to FastAPI
+                   │    /backend/*  → raw FastAPI (rewrite; used for local frontend dev)
+                   └─ FastAPI backend   127.0.0.1:8000   api/        (Erwin)
+                        ├─ Supabase Postgres  (homes, listing_details, load_meta)
+                        ├─ Featherless LLM    (Qwen3-32B for /chat)
+                        └─ model files baked into the image (data/, results/)
+```
+
+`start.sh` runs both processes. If either one dies, the machine exits and Fly restarts it.
+Model training (q/PyKX, LightGBM, Optuna, MiniLM) runs **only on Erwin's laptop**. The server
+loads the finished files and uses the NumPy fallback instead of q.
+
+### What each person needs
+
+| Task | Needs | Who has it |
+|---|---|---|
+| Frontend dev (`frontend/`) | Node ≥ 20.9 and this repo. **No secrets.** | anyone |
+| Run the backend locally | Python 3.14, `pip install -r requirements.txt`, and a `.env` with `FEATHERLESS_API_KEY` and `SUPABASE_DB_URL` (session pooler URL) | Erwin (`.env` is never committed) |
+| Retrain models | The above, plus the raw Kaggle file in `data/raw/` and a q/PyKX licence | Erwin's laptop |
+| Deploy from a laptop | `flyctl` logged into the Fly org that owns `quanthouse` | Erwin |
+| Deploy by pushing to `main` | `FLY_API_TOKEN` repo secret (GitHub Actions → `flyctl deploy`) | **not set yet** (see below) |
+| Domain and DNS | Namecheap account for `quanthouse.casa` | Erwin |
+| Supabase / Featherless dashboards | project `remenfbvjtpjpygtlpiu` / Featherless account | Erwin |
+
+Fly secrets (server environment, set with `fly secrets set NAME=value -a quanthouse`):
+`FEATHERLESS_API_KEY`, `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
+`BACKEND_API_URL=http://127.0.0.1:8000` is baked into the image.
+
+### Run locally
+
+```bash
+# Frontend only, against the live backend (no secrets needed)
+cd frontend && npm ci
+echo "BACKEND_API_URL=https://quanthouse.casa/backend" > .env.local
+npm run dev                                   # http://localhost:3000
+#   or DATA_SOURCE=fixtures in .env.local for offline placeholder data
+
+# Backend (needs .env)
+python -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn api.main:app --port 8000    # API + old test page at http://localhost:8000
+.venv/bin/python api/test_api.py              # 16 endpoint checks
+cd frontend && npm run verify:live -- http://localhost:3000 http://127.0.0.1:8000
+
+# The full production image, exactly as Fly builds it
+docker build -t quanthouse . && docker run --rm -p 8080:8080 --env-file .env quanthouse
+```
+
+### Deploy
+
+- **From Erwin's laptop:** `fly deploy --remote-only` (about 5 minutes). The release step runs
+  `python load.py --if-changed`, which reloads Supabase only when `data/predictions.parquet`,
+  `data/listing_details.parquet` or `db/schema.sql` changed.
+- **By pushing to `main`:** `.github/workflows/deploy.yml` runs `flyctl deploy`. To turn it on:
+  1. Erwin runs `fly tokens create deploy -a quanthouse` (a token scoped to this app only) and
+     sends it to salehk1 **privately**.
+  2. salehk1 (repo admin) adds it under *Settings → Secrets and variables → Actions* as
+     `FLY_API_TOKEN`.
+  Until then, pushes to `main` don't deploy anything.
+- **Check a deploy:** `fly status -a quanthouse`, `fly logs -a quanthouse`, then open
+  https://quanthouse.casa. **Roll back** with `fly releases -a quanthouse --image`, then
+  `fly deploy --image <previous>`.
+- **New model:** retrain on the laptop, commit `data/` and `results/`, then deploy.
+
+### Current status and known issues (Oct 23, ~2 pm)
+
+- **Fixed in this change: the wrong frontend was live.** quanthouse.casa served FastAPI's
+  one-file test page (`api/static/index.html`) and an older model, because the Dockerfile only
+  built the Python API. Saleh's Next.js app (`frontend/`) wasn't deployed anywhere. The image now
+  builds both, with Next.js on the public port. The old test page is still at
+  `http://localhost:8000/` locally, and isn't public.
+- **Not set yet:** the `FLY_API_TOKEN` repo secret (see Deploy), so pushes to `main` don't deploy.
+- **`/chat` has no rate limit or auth.** Anyone can spend Featherless credits. Add a limit
+  before sharing the link widely.
+- **Rotate after the event:** the Featherless key and the Supabase DB password were shared in
+  chat logs.
+- **Photos:** the API returns photo counts but not URLs, so the report shows an illustration.
+- **Public repo:** `data/listing_details.parquet` includes agent phone numbers from the
+  (public) Kaggle dataset. The API never returns them.
+
 ## Data
 
 The **Houston Housing Market 2024** dataset (Zillow listings, distributed on Kaggle), licensed
@@ -172,7 +258,7 @@ price fields are `"unknown"`.
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /` | Local test page: Leaflet map colored by verdict, click a home for its report, search box, chat |
+| `GET /` | Backend test page (local only; the public site is the Next.js app in `frontend/`) |
 | `POST /report` | Due-diligence report (above) |
 | `GET /home/{zpid}` | Listing row and its receipt |
 | `POST /predict` | Fair price, range and receipt for a hypothetical home (optional `description` uses MiniLM) |
