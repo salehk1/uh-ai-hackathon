@@ -10,6 +10,7 @@ from scipy.spatial import cKDTree
 
 log = logging.getLogger("spatial")
 LAT0, LON0 = 29.7604, -95.3698
+Z_CLIP = 3.0
 GWR_VARS = ["livingArea", "age", "school_mean", "dist_downtown", "bedrooms", "bathrooms"]
 
 try:
@@ -106,7 +107,7 @@ def standardize(df, cols, stats=None):
     if stats is None:
         stats = {c: (float(df[c].mean()), float(df[c].std())) for c in cols}
     Z = np.column_stack([(df[c].to_numpy(float) - stats[c][0]) / stats[c][1] for c in cols])
-    return Z, stats
+    return np.clip(Z, -Z_CLIP, Z_CLIP), stats  # winsorize so local fits never extrapolate wildly
 
 
 def design(Z):
