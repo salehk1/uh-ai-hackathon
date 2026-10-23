@@ -52,15 +52,20 @@ def pca_extra(emb, n=N_PCA):
     return f
 
 
-def cv_lgb(X, y, xy, folds, params=LGB_PARAMS, rounds=LGB_ROUNDS, use_lag=True, extra=None, k_lag=15):
+def cv_lgb(X, y, xy, folds, params=LGB_PARAMS, rounds=LGB_ROUNDS, use_lag=True, extra=None, k_lag=15,
+           train_frac=1.0, seed=0):
     """Out-of-fold LightGBM predictions under the spatial block folds.
 
     X: base feature matrix; the spatial lag and optional extra(tr, te) features are recomputed per
     fold from training rows only, so nothing about a test home's price leaks in.
+    train_frac < 1 subsamples each fold's training rows (learning curves).
     """
     oof = np.empty(len(y))
+    rng = np.random.default_rng(seed)
     for f in range(folds.max() + 1):
         tr, te = np.where(folds != f)[0], np.where(folds == f)[0]
+        if train_frac < 1:
+            tr = np.sort(rng.choice(tr, int(len(tr) * train_frac), replace=False))
         A_tr, A_te = X[tr], X[te]
         if use_lag:
             lag_tr, lag_te = lag_for(xy, y, tr, te, k_lag)
@@ -92,8 +97,8 @@ def load_config():
             "text_emb": cfg.get("text_emb", False), "source": str(p) if p.exists() else "defaults"}
 
 
-def load_emb(df):
-    z = np.load("data/desc_emb.npz")
+def load_emb(df, tag=""):
+    z = np.load(f"data/desc_emb{tag}.npz")
     pos = pd.Series(np.arange(len(z["zpid"])), index=z["zpid"])
     return z["emb"][pos.loc[df.zpid].to_numpy()]
 
@@ -132,7 +137,7 @@ def main():
     folds = sp.block_folds(xy)
     k_lag, k_gwr = meta["k_lag"], meta["k_best"]
     Xl = df[BASE_COLS].to_numpy(float)
-    extra = pca_extra(load_emb(df)) if cfg["text_emb"] else None
+    extra = pca_extra(load_emb(df, args.tag)) if cfg["text_emb"] else None
     print(f"config: {cfg['source']} text_emb={cfg['text_emb']}")
 
     oof = {}
@@ -195,7 +200,7 @@ def main():
     A_q, pca_info = A, None
     if cfg["text_emb"]:
         from sklearn.decomposition import PCA
-        emb = load_emb(df)
+        emb = load_emb(df, args.tag)
         pca = PCA(N_PCA, random_state=0).fit(emb)
         A_q = np.c_[A, pca.transform(emb)]
         np.savez(models / f"pca{args.tag}.npz", components=pca.components_, mean=pca.mean_)
