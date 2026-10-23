@@ -1,46 +1,47 @@
 @import "tailwindcss";
 
 /*
- * Design tokens: warm off-white canvas, white surfaces, muted forest/sage, charcoal ink.
- * Verdicts: blue = below range, grey = within, red = above. Ochre marks caution/fixtures.
- * Contrast: ink-3 on canvas ≈ 4.8:1, forest on white ≈ 7.4:1, ochre-ink on white ≈ 5.6:1.
+ * Design tokens: cool daylight. Sky canvas, white surfaces, navy ink, one deep teal brand accent.
+ * Brand is never an analytical meaning. Verdicts: blue = below range, grey = within, red = above.
+ * Amber is reserved for caution/fixture notices. Contrast: ink-3 on canvas ≈ 4.9:1, brand on white ≈ 6.0:1.
  */
 :root {
-  --canvas: #f6f4ee;
+  --canvas: #f3f7fc;
   --surface: #ffffff;
-  --surface-2: #f0ede4;
-  --surface-3: #e8e4d8;
-  --line: #e2ddd0;
-  --line-strong: #cfc8b7;
-  --ink: #1d221f;
-  --ink-2: #434b45;
-  --ink-3: #626a63;
-  --forest: #2e5a45;
-  --forest-2: #24483a;
-  --sage: #8fae96;
-  --sage-soft: #e3ece4;
-  --sage-tint: #f1f5f0;
-  --ochre: #b98535;
-  --ochre-ink: #85591a;
-  --ochre-soft: #f6ead3;
+  --surface-2: #eaf1f8;
+  --surface-3: #dce7f2;
+  --line: #d4e0ec;
+  --line-strong: #afc2d5;
+  --ink: #142b45;
+  --ink-2: #425a71;
+  --ink-3: #596f84;
+  --brand: #176b78;
+  --brand-2: #11515c;
+  --mint: #7fc4b4;
+  --brand-soft: #e0f1f2;
+  --brand-tint: #eff7f8;
+  --sky: #d7eaf6;
+  --amber: #b7791f;
+  --amber-ink: #7f5310;
+  --amber-soft: #fbf0dc;
   --slate: #4f6d8a;
   --slate-ink: #3c5872;
   --slate-soft: #e3eaf1;
   /* Verdict colors (team rule): low = blue, expected = neutral grey, high = red. Always with text + icon. */
-  --v-low: #3a6ea5;
-  --v-low-ink: #2b5689;
-  --v-low-soft: #e2ebf6;
-  --v-expected: #8b8f88;
-  --v-expected-ink: #4b514c;
-  --v-expected-soft: #eeede7;
-  --v-high: #b8483b;
-  --v-high-ink: #93342a;
-  --v-high-soft: #f8e4e0;
-  --danger: #a3452f;
-  --danger-soft: #f7e4dd;
-  --shadow-sm: 0 1px 2px rgb(40 36 24 / 0.06);
-  --shadow-md: 0 1px 2px rgb(40 36 24 / 0.05), 0 8px 24px -12px rgb(40 36 24 / 0.18);
-  --shadow-lg: 0 2px 4px rgb(40 36 24 / 0.05), 0 24px 48px -20px rgb(40 36 24 / 0.28);
+  --v-low: #2f6fb3;
+  --v-low-ink: #1f5694;
+  --v-low-soft: #e1ecf8;
+  --v-expected: #8d99a6;
+  --v-expected-ink: #45566a;
+  --v-expected-soft: #edf1f5;
+  --v-high: #c0443a;
+  --v-high-ink: #982f27;
+  --v-high-soft: #fae5e2;
+  --danger: #b03a2e;
+  --danger-soft: #fae5e2;
+  --shadow-sm: 0 1px 2px rgb(20 43 69 / 0.06);
+  --shadow-md: 0 1px 2px rgb(20 43 69 / 0.05), 0 10px 28px -14px rgb(20 43 69 / 0.22);
+  --shadow-lg: 0 2px 4px rgb(20 43 69 / 0.05), 0 28px 56px -24px rgb(20 43 69 / 0.32);
 }
 
 @theme inline {
@@ -53,14 +54,15 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
-  --color-forest: var(--forest);
-  --color-forest-2: var(--forest-2);
-  --color-sage: var(--sage);
-  --color-sage-soft: var(--sage-soft);
-  --color-sage-tint: var(--sage-tint);
-  --color-ochre: var(--ochre);
-  --color-ochre-ink: var(--ochre-ink);
-  --color-ochre-soft: var(--ochre-soft);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-mint: var(--mint);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-sky: var(--sky);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-amber-soft: var(--amber-soft);
   --color-slate: var(--slate);
   --color-slate-ink: var(--slate-ink);
   --color-slate-soft: var(--slate-soft);
@@ -76,11 +78,11 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-face), var(--font-ui), ui-sans-serif, system-ui, sans-serif;
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
-  --radius-card: 1.25rem;
+  --radius-card: 1.125rem;
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -102,13 +104,13 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--forest);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 ::selection {
-  background: var(--sage-soft);
+  background: var(--brand-soft);
 }
 
 /* MapLibre tuning to match the palette */
@@ -123,7 +125,7 @@ body {
   border-radius: 8px 0 0 0;
 }
 .maplibregl-canvas:focus-visible {
-  outline: 2px solid var(--forest);
+  outline: 2px solid var(--brand);
   outline-offset: -2px;
 }
 
@@ -163,7 +165,7 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: var(--forest);
+  background: var(--brand);
   color: #fff;
   font: 700 11px/1 var(--font-sans);
   border: 2px solid #fff;
@@ -177,11 +179,27 @@ body {
 .comp-pin:hover > span,
 .comp-pin.is-active > span {
   transform: scale(1.25);
-  background: var(--forest-2);
+  background: var(--brand-2);
 }
 .comp-pin-home > span {
   width: 28px;
   height: 28px;
   background: var(--ink);
   font-size: 13px;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  letter-spacing: -0.02em;
+}
+
+/* Blueprint grid: the shared motif behind the intro, report identity and page heads. */
+.blueprint {
+  background-color: var(--canvas);
+  background-image:
+    linear-gradient(to right, rgb(23 107 120 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(23 107 120 / 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
 }

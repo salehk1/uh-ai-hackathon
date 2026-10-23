@@ -55,8 +55,8 @@ export function LookupView() {
         <ul className="mt-4 divide-y divide-line">
           {matches!.map((m) => (
             <li key={m.zpid}>
-              <Link href={`/property/${m.zpid}`} className="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-sage-tint">
-                <MapPinned className="size-4 shrink-0 text-forest" aria-hidden />
+              <Link href={`/property/${m.zpid}`} className="flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-brand-tint">
+                <MapPinned className="size-4 shrink-0 text-brand" aria-hidden />
                 <span className="flex-1 text-[14px] text-ink">{m.address}</span>
                 <span className="tabular text-xs text-ink-3">{m.zpid}</span>
                 <ArrowUpRight className="size-4 text-ink-3" aria-hidden />

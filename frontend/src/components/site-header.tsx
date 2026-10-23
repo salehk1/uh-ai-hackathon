@@ -20,13 +20,15 @@ export function SiteHeader() {
   const { openAnalyst } = useAnalyst();
   if (pathname === "/") return null;
   return (
-    <header className="sticky top-0 z-40 border-b border-line/80 bg-canvas/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-line/80 bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 sm:gap-5 sm:px-6">
         <Link href="/explore" className="flex shrink-0 items-center gap-2 rounded-lg pr-2 text-ink" aria-label="QuantHouse home">
           <Logo className="size-7" />
-          <span className="hidden text-[15px] font-semibold tracking-tight sm:inline">QuantHouse</span>
+          <span className="hidden font-display text-[17px] font-bold tracking-tight sm:inline">
+            Quant<span className="text-brand">House</span>
+          </span>
         </Link>
-        <nav aria-label="Primary" className="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none]">
+        <nav aria-label="Primary" className="-mx-1 flex h-full min-w-0 flex-1 items-stretch gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
           {NAV.map((n) => {
             const on = pathname === n.href || pathname.startsWith(n.href + "/");
             return (
@@ -35,8 +37,9 @@ export function SiteHeader() {
                 href={n.href}
                 aria-current={on ? "page" : undefined}
                 className={clsx(
-                  "shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-150",
-                  on ? "bg-surface text-ink shadow-sm ring-1 ring-line" : "text-ink-3 hover:bg-surface-2 hover:text-ink",
+                  "relative flex shrink-0 items-center px-2.5 text-[13.5px] font-semibold transition-colors duration-150",
+                  "after:absolute after:inset-x-2.5 after:bottom-0 after:h-[2.5px] after:rounded-t-full after:transition-colors after:duration-150",
+                  on ? "text-ink after:bg-brand" : "text-ink-3 after:bg-transparent hover:text-ink hover:after:bg-line-strong",
                 )}
               >
                 {n.label}
@@ -48,9 +51,9 @@ export function SiteHeader() {
         <button
           type="button"
           onClick={() => openAnalyst()}
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-line bg-surface px-3 text-[13px] font-medium text-ink shadow-sm transition-colors duration-150 hover:border-line-strong hover:bg-sage-tint active:scale-[0.98]"
+          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[10px] bg-ink px-3.5 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-brand-2 active:scale-[0.98]"
         >
-          <MessageSquareText className="size-4 text-forest" aria-hidden />
+          <MessageSquareText className="size-4 text-mint" aria-hidden />
           <span className="hidden md:inline">Ask the analyst</span>
           <span className="md:hidden">Ask</span>
         </button>

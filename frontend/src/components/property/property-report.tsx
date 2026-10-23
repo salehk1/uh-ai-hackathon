@@ -142,11 +142,11 @@ function ReportView({
       <BackLink href={backHref} />
 
       {/* identity */}
-      <header className="mt-4 grid gap-5 lg:grid-cols-[1fr_1.1fr] lg:gap-7">
+      <header className="blueprint mt-4 grid gap-5 rounded-[24px] border border-line p-4 sm:p-6 lg:grid-cols-[1.4fr_0.6fr] lg:gap-7">
         <motion.figure
           initial={{ opacity: 0, scale: 0.985 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative overflow-hidden rounded-[22px] border border-line bg-[#eef2ea] shadow-sm lg:min-h-[300px]"
+          className="relative overflow-hidden rounded-[18px] border border-line bg-sky lg:order-last lg:min-h-[280px]"
         >
           <div className="aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto">
             <HouseIllustration seed={l.zpid} homeType={l.home_type ?? null} />
@@ -166,7 +166,7 @@ function ReportView({
             Listing {l.zpid}
             {l.mls_id ? ` · MLS ${l.mls_id}` : ""}
           </p>
-          <h1 className="mt-0.5 font-display text-[34px] leading-[1.08] tracking-tight text-ink sm:text-[42px]">{title}</h1>
+          <h1 className="mt-0.5 font-display text-[34px] font-bold leading-[1.04] tracking-[-0.03em] text-ink [overflow-wrap:anywhere] sm:text-[46px]">{title}</h1>
           <p className="mt-1 text-[15px] text-ink-2">
             {address && l.street_address ? address.slice(l.street_address.length + 2) : l.zipcode ? `ZIP ${l.zipcode}` : "Location not listed"}
           </p>
@@ -187,7 +187,7 @@ function ReportView({
               </a>
             )}
             <Button variant="secondary" onClick={ask}>
-              <MessageSquareText className="size-4 text-forest" aria-hidden /> Ask about this home
+              <MessageSquareText className="size-4 text-brand" aria-hidden /> Ask about this home
             </Button>
           </div>
 
@@ -264,7 +264,7 @@ function ReportView({
 }
 
 const buttonLike =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-medium text-ink shadow-sm transition-colors hover:border-line-strong hover:bg-sage-tint";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-line-strong/70 bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:border-brand/50 hover:bg-brand-tint";
 
 /** Three separate answers at a glance; each links to its section. No combined score. */
 function QuestionSummary({ report: r }: { report: Report }) {
@@ -314,10 +314,10 @@ function SummaryCard({ href, step, icon, title, children }: { href: string; step
   return (
     <a
       href={href}
-      className="group rounded-2xl border border-line bg-surface p-3.5 shadow-sm transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md"
+      className="group rounded-[14px] border border-line bg-surface p-3.5 transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md"
     >
-      <p className="mb-2 flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[0.07em] text-ink-3">
-        <span className="text-forest" aria-hidden>
+      <p className="mb-2 flex items-center gap-1.5 text-[12.5px] font-semibold text-ink-2">
+        <span className="text-brand" aria-hidden>
           {icon}
         </span>
         {step} · {title}
@@ -359,7 +359,7 @@ function PriceSection({
         )}
         <dl className="mt-5 grid gap-5 sm:grid-cols-3">
           <BigNumber label={offer !== undefined ? "Your offer" : "Asking price"}>{usd(p.asking)}</BigNumber>
-          <BigNumber label="Fair price" tone="forest">
+          <BigNumber label="Fair price" tone="brand">
             {isKnown(p.fair) ? usd(p.fair) : <UnknownValue reason={outOfScopeReason} className="text-[14px]" />}
           </BigNumber>
           <BigNumber label="Asking vs fair">
@@ -374,7 +374,7 @@ function PriceSection({
               Shaded band: calibrated 80% fair range{" "}
               {p.range_coverage !== undefined && <>(measured coverage {(p.range_coverage * 100).toFixed(1)}%)</>}. Coverage describes the
               model across held-out Houston listings, not this particular home.{" "}
-              <Link href="/methodology#intervals" className="text-forest underline underline-offset-2">
+              <Link href="/methodology#intervals" className="text-brand underline underline-offset-2">
                 How the range is calibrated
               </Link>
             </p>
@@ -490,11 +490,11 @@ function OfferForm({
   );
 }
 
-function BigNumber({ label, children, tone }: { label: string; children: ReactNode; tone?: "forest" }) {
+function BigNumber({ label, children, tone }: { label: string; children: ReactNode; tone?: "brand" }) {
   return (
     <div>
       <dt className="text-xs font-medium text-ink-3">{label}</dt>
-      <dd className={clsx("tabular mt-1 text-[28px] font-semibold leading-tight tracking-tight", tone === "forest" ? "text-forest" : "text-ink")}>{children}</dd>
+      <dd className={clsx("tabular mt-1 text-[28px] font-semibold leading-tight tracking-tight", tone === "brand" ? "text-brand" : "text-ink")}>{children}</dd>
     </div>
   );
 }
@@ -525,8 +525,8 @@ function Section({
     >
       <div className="flex items-start gap-3.5">
         {step !== undefined && (
-          <span className="mt-5 grid size-8 shrink-0 place-items-center rounded-full bg-forest text-[14px] font-semibold text-white" aria-hidden>
-            {step}
+          <span className="tabular mt-5 grid h-8 shrink-0 place-items-center rounded-[9px] bg-ink px-2 font-display text-[13px] font-bold text-white" aria-hidden>
+            0{step}
           </span>
         )}
         <div className="min-w-0 flex-1">
@@ -542,7 +542,7 @@ function Section({
 
 function Chip({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
-    <li className="tabular inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 shadow-sm">
+    <li className="tabular inline-flex items-center gap-1.5 rounded-[9px] border border-line bg-surface/90 px-2.5 py-1.5">
       <span className="text-ink-3" aria-hidden>
         {icon}
       </span>

@@ -12,6 +12,7 @@ import { Logo } from "../logo";
 import { Button } from "../ui";
 
 const SKIP_KEY = "hpr:skip-intro";
+const QUESTIONS = ["Is the price fair?", "Does it check out?", "What will it cost monthly?"];
 const FINAL = { center: [-95.369, 29.756] as [number, number], zoom: 14.4, pitch: 60, bearing: -32 };
 
 /**
@@ -50,7 +51,7 @@ export function IntroView() {
   };
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-canvas">
+    <div className="blueprint relative flex-1 overflow-hidden">
       <BaseMap
         className="absolute inset-0"
         interactive={false}
@@ -67,11 +68,18 @@ export function IntroView() {
           };
         }}
       />
-      {/* soft wash so text stays legible over any tile */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(246,244,238,0.94)_0%,rgba(246,244,238,0.78)_34%,rgba(246,244,238,0)_68%)] max-md:bg-[linear-gradient(0deg,rgba(246,244,238,0.96)_0%,rgba(246,244,238,0.85)_45%,rgba(246,244,238,0.1)_80%)]" />
+      {/* cool wash on the text side only; the map stays clear on the right */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgb(243_247_252/0.92)_0%,rgb(243_247_252/0.6)_38%,rgb(215_234_246/0)_62%)] max-md:bg-[linear-gradient(0deg,rgb(243_247_252/0.96)_0%,rgb(243_247_252/0.82)_48%,rgb(215_234_246/0)_82%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(215_234_246/0.7),transparent)]" />
 
-      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
-        <Button variant="secondary" size="sm" onClick={go} className="shadow-md">
+      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 pt-4 sm:px-10 sm:pt-6">
+        <span className="flex items-center gap-2.5">
+          <Logo className="size-8" />
+          <span className="font-display text-[17px] font-bold tracking-tight text-ink">
+            Quant<span className="text-brand">House</span>
+          </span>
+        </span>
+        <Button variant="secondary" size="sm" onClick={go} className="bg-surface/90 backdrop-blur">
           Skip intro
         </Button>
       </div>
@@ -80,28 +88,39 @@ export function IntroView() {
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: reduced ? 0 : 0.35 }}
-          className="max-w-[34rem]"
+          transition={{ duration: 0.45, delay: reduced ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-[38rem]"
         >
-          <div className="flex items-center gap-2.5">
-            <Logo className="size-9" />
-            <span className="text-[13px] font-semibold uppercase tracking-[0.12em] text-forest">Houston · 2024 listings</span>
-          </div>
-          <h1 className="mt-5 font-display text-[44px] leading-[1.02] tracking-tight text-ink sm:text-[64px]">QuantHouse</h1>
-          <p className="mt-4 max-w-[30rem] text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
-            One report for any Houston listing, answering three separate questions: is the price reasonable, does the listing check
-            out, and what will it cost per month?
+          <p className="flex items-center gap-2 text-[13px] font-semibold text-brand">
+            <span className="h-px w-6 bg-brand/60" aria-hidden />
+            Houston · 2024 listings
           </p>
+          <h1 className="mt-4 font-display text-[46px] font-bold leading-[0.98] tracking-[-0.035em] text-ink sm:text-[76px]">
+            Know the house
+            <br />
+            <span className="text-brand">before the offer.</span>
+          </h1>
+          <p className="mt-5 max-w-[32rem] text-[16px] leading-relaxed text-ink-2 sm:text-[17px]">
+            One due-diligence report for any Houston listing. Three separate answers, each with its own evidence.
+          </p>
+          <ol className="mt-6 grid max-w-[32rem] gap-2 sm:grid-cols-3">
+            {QUESTIONS.map((q, i) => (
+              <li key={q} className="flex items-baseline gap-2 rounded-[12px] border border-line bg-surface/85 px-3 py-2.5 backdrop-blur">
+                <span className="tabular font-display text-[12px] font-bold text-brand">0{i + 1}</span>
+                <span className="text-[13.5px] font-semibold leading-snug text-ink">{q}</span>
+              </li>
+            ))}
+          </ol>
           <div className="mt-7 flex flex-wrap items-center gap-4">
             <Button ref={exploreRef} variant="primary" size="lg" onClick={go} className="shadow-md">
-              Explore <ArrowRight className="size-4" aria-hidden />
+              Explore the map <ArrowRight className="size-4" aria-hidden />
             </Button>
-            <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-ink-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] font-medium text-ink-2">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="size-4 rounded border-line-strong accent-[var(--forest)]"
+                className="size-4 rounded border-line-strong accent-[var(--brand)]"
               />
               Skip the intro next time
             </label>

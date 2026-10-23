@@ -1,20 +1,23 @@
-/** Literal colors for canvas/SVG contexts that can't read CSS variables (MapLibre paint, chart fills). */
+/** Literal colors for canvas/SVG contexts that can't read CSS variables (MapLibre paint, chart fills). Mirrors globals.css. */
 export const C = {
-  ink: "#1d221f",
-  ink3: "#626a63",
-  line: "#e2ddd0",
+  ink: "#142b45",
+  ink3: "#596f84",
+  line: "#d4e0ec",
   surface: "#ffffff",
-  forest: "#2e5a45",
-  sage: "#8fae96",
-  sageSoft: "#e3ece4",
-  ochre: "#b98535",
-  ochreSoft: "#f6ead3",
+  canvas: "#f3f7fc",
+  sky: "#d7eaf6",
+  brand: "#176b78",
+  brand2: "#11515c",
+  mint: "#7fc4b4",
+  brandSoft: "#e0f1f2",
+  amber: "#b7791f",
+  amberSoft: "#fbf0dc",
   slate: "#4f6d8a",
   slateSoft: "#e3eaf1",
-  neutral: "#b8b3a4",
-  vLow: "#3a6ea5",
-  vExpected: "#9a9d96",
-  vHigh: "#b8483b",
+  neutral: "#afc2d5",
+  vLow: "#2f6fb3",
+  vExpected: "#8d99a6",
+  vHigh: "#c0443a",
 } as const;
 
 /** Verdict colors. Always paired with text/icons; never the only cue. */
@@ -22,18 +25,18 @@ export const VERDICT_COLOR = { high: C.vHigh, low: C.vLow, expected: C.vExpected
 
 /** Diverging stops for residual_pct (fraction): below estimate → blue, near → grey, above → red. */
 export const RESIDUAL_STOPS: [number, string][] = [
-  [-0.3, "#2b5689"],
-  [-0.12, "#7fa3cb"],
-  [0, "#c9cac4"],
-  [0.12, "#d98f83"],
-  [0.3, "#93342a"],
+  [-0.3, "#1f5694"],
+  [-0.12, "#7ea7d4"],
+  [0, "#c6ced6"],
+  [0.12, "#e08f86"],
+  [0.3, "#982f27"],
 ];
 
-/** Sequential stops for asking $/sqft. */
+/** Sequential stops for asking $/sqft (single teal hue, light → dark). */
 export const PPSF_STOPS: [number, string][] = [
-  [100, "#e3ece4"],
-  [175, "#b4cdb9"],
-  [250, "#7fa48a"],
-  [350, "#4e7c62"],
-  [500, "#24483a"],
+  [100, "#d9eff0"],
+  [175, "#a3d3d4"],
+  [250, "#5fa9b0"],
+  [350, "#24808c"],
+  [500, "#0f4a54"],
 ];

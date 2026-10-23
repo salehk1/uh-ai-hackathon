@@ -84,9 +84,9 @@ export function ExploreMap(p: Props) {
       source: "sample",
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": C.sage,
+        "circle-color": C.mint,
         "circle-opacity": 0.28,
-        "circle-stroke-color": C.sage,
+        "circle-stroke-color": C.mint,
         "circle-stroke-opacity": 0.6,
         "circle-stroke-width": 1,
         "circle-radius": ["step", ["get", "point_count"], 12, 25, 15, 100, 19, 300, 24],

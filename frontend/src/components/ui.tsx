@@ -9,15 +9,15 @@ type Variant = "primary" | "secondary" | "ghost" | "quiet";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium select-none whitespace-nowrap " +
+  "inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold select-none whitespace-nowrap " +
   "transition-[background-color,color,box-shadow,transform,border-color] duration-150 ease-out " +
   "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-forest text-white shadow-sm hover:bg-forest-2 hover:shadow-md",
-  secondary: "bg-surface text-ink border border-line shadow-sm hover:border-line-strong hover:bg-sage-tint",
+  primary: "bg-brand text-white shadow-[inset_0_-2px_0_rgb(0_0_0/0.14)] hover:bg-brand-2 hover:shadow-md",
+  secondary: "bg-surface text-ink border border-line-strong/70 hover:border-brand/50 hover:bg-brand-tint",
   ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
-  quiet: "text-forest hover:bg-sage-tint underline-offset-4 hover:underline",
+  quiet: "text-brand hover:bg-brand-tint underline-offset-4 hover:underline",
 };
 
 const sizes: Record<Size, string> = {
@@ -68,8 +68,13 @@ export function Card({ className, ...rest }: ComponentProps<"div">) {
 export function SectionHeading({ eyebrow, title, id, children }: { eyebrow?: string; title: string; id?: string; children?: ReactNode }) {
   return (
     <div className="mb-5">
-      {eyebrow && <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">{eyebrow}</p>}
-      <h2 id={id} className="text-xl font-semibold tracking-tight text-ink">
+      {eyebrow && (
+        <p className="mb-1.5 flex items-center gap-2 text-[13px] font-semibold text-brand">
+          <span className="h-px w-5 bg-brand/60" aria-hidden />
+          {eyebrow}
+        </p>
+      )}
+      <h2 id={id} className="font-display text-[22px] font-semibold tracking-tight text-ink">
         {title}
       </h2>
       {children && <div className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-2">{children}</div>}
@@ -96,7 +101,7 @@ export function ErrorState({
     <div
       role="alert"
       className={clsx(
-        "flex gap-3 rounded-2xl border border-danger/25 bg-danger-soft/60 text-sm text-ink",
+        "flex gap-3 rounded-2xl border border-danger/25 bg-danger-soft/70 text-sm text-ink",
         compact ? "p-3" : "p-4",
       )}
     >
@@ -119,7 +124,7 @@ export function Notice({ icon, children, tone = "neutral" }: { icon?: ReactNode;
     <div
       className={clsx(
         "flex gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed",
-        tone === "caution" ? "border-ochre/30 bg-ochre-soft/60 text-ink" : "border-line bg-surface-2/60 text-ink-2",
+        tone === "caution" ? "border-amber/30 bg-amber-soft/60 text-ink" : "border-line bg-surface-2/60 text-ink-2",
       )}
     >
       {icon && <span className="mt-0.5 shrink-0 text-ink-3">{icon}</span>}
@@ -132,7 +137,7 @@ export function Stat({ label, value, sub, className }: { label: string; value: R
   return (
     <div className={className}>
       <dt className="text-xs font-medium text-ink-3">{label}</dt>
-      <dd className="tabular mt-1 text-lg font-semibold tracking-tight text-ink">{value}</dd>
+      <dd className="tabular mt-1 font-display text-lg font-semibold tracking-tight text-ink">{value}</dd>
       {sub && <dd className="mt-0.5 text-xs text-ink-3">{sub}</dd>}
     </div>
   );
@@ -152,7 +157,7 @@ export function Segmented<T extends string>({
   size?: "sm" | "md";
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line bg-surface-2 p-0.5">
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-[11px] border border-line bg-surface-2 p-0.5">
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -163,9 +168,9 @@ export function Segmented<T extends string>({
             aria-checked={on}
             onClick={() => onChange(o.value)}
             className={clsx(
-              "inline-flex items-center gap-1.5 rounded-full font-medium transition-[background-color,color,box-shadow] duration-150",
+              "inline-flex items-center gap-1.5 rounded-[8px] font-semibold transition-[background-color,color,box-shadow] duration-150",
               size === "sm" ? "h-7 px-2.5 text-xs" : "h-8 px-3.5 text-[13px]",
-              on ? "bg-surface text-ink shadow-sm" : "text-ink-3 hover:text-ink",
+              on ? "bg-surface text-brand-2 shadow-sm ring-1 ring-line" : "text-ink-3 hover:text-ink",
             )}
           >
             {o.label}
@@ -177,8 +182,8 @@ export function Segmented<T extends string>({
 }
 
 export const inputClass =
-  "h-10 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink shadow-sm transition-[border-color,box-shadow] duration-150 " +
-  "placeholder:text-ink-3/70 hover:border-line-strong focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/15 " +
+  "h-10 w-full rounded-[10px] border border-line-strong/70 bg-surface px-3 text-sm text-ink transition-[border-color,box-shadow] duration-150 " +
+  "placeholder:text-ink-3/70 hover:border-line-strong focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/15 " +
   "aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger/15 disabled:opacity-60";
 
 export function Field({

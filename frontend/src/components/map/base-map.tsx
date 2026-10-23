@@ -39,14 +39,30 @@ export function addBuildingExtrusions(map: MLMap) {
       "source-layer": "building",
       minzoom: 13,
       paint: {
-        "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 0], 0, "#ebe7dc", 60, "#ddd8ca", 200, "#cfc9b8"],
+        "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 0], 0, "#e6eef6", 60, "#d3e0ec", 200, "#bccfe0"],
         "fill-extrusion-height": ["interpolate", ["linear"], ["zoom"], 13, 0, 13.8, ["coalesce", ["get", "render_height"], 0]],
         "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-        "fill-extrusion-opacity": 0.75,
+        "fill-extrusion-opacity": 0.8,
       },
     },
     firstSymbol,
   );
+}
+
+/** Cool the Positron base through its own layers (no CSS filter, so verdict colors stay exact). */
+export function tintBaseStyle(map: MLMap) {
+  const layers = (map.getStyle() as StyleSpecification).layers ?? [];
+  for (const l of layers) {
+    try {
+      if (l.type === "background") map.setPaintProperty(l.id, "background-color", "#f1f5fa");
+      else if (l.type === "fill" && /water/.test(l.id)) map.setPaintProperty(l.id, "fill-color", "#c9e1f2");
+      else if (l.type === "line" && /waterway|river/.test(l.id)) map.setPaintProperty(l.id, "line-color", "#b5d5ec");
+      else if (l.type === "fill" && /park|wood|grass|landcover/.test(l.id)) map.setPaintProperty(l.id, "fill-color", "#e1f0ea");
+      else if (l.type === "fill" && /landuse|residential/.test(l.id)) map.setPaintProperty(l.id, "fill-color", "#ebf1f7");
+    } catch {
+      /* layer shape differs; leave it as styled */
+    }
+  }
 }
 
 export function setExtrusionsVisible(map: MLMap, on: boolean) {
@@ -118,6 +134,7 @@ export function BaseMap({
     m.on("load", () => {
       window.clearTimeout(timer);
       try {
+        tintBaseStyle(m);
         addBuildingExtrusions(m);
       } catch {
         /* extrusions are optional decoration */
@@ -158,15 +175,15 @@ export function BaseMap({
 /** Shown when WebGL or the tile style is unavailable. The rest of the page keeps working. */
 export function MapFallback({ message = "The map couldn't load here (WebGL or map tiles unavailable). The listing list still works." }: { message?: string }) {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_45%,#eef2ea_0%,#f6f4ee_60%)] p-6">
+    <div className="flex h-full w-full items-center justify-center blueprint bg-[radial-gradient(circle_at_40%_45%,#e0f1f2_0%,#f3f7fc_60%)] p-6">
       <svg viewBox="0 0 200 120" className="absolute inset-0 h-full w-full opacity-40" aria-hidden preserveAspectRatio="xMidYMid slice">
-        <path d="M0 70 C40 60 70 80 100 66 S160 50 200 60" stroke="#b4cdb9" strokeWidth="1.2" fill="none" />
-        <path d="M30 0 C40 40 60 70 50 120" stroke="#d6d1c3" strokeWidth="0.8" fill="none" />
-        <path d="M120 0 C110 40 130 80 140 120" stroke="#d6d1c3" strokeWidth="0.8" fill="none" />
-        <circle cx="100" cy="64" r="18" stroke="#cfc9b8" strokeWidth="0.6" fill="none" />
-        <circle cx="100" cy="64" r="38" stroke="#e2ddd0" strokeWidth="0.6" fill="none" />
+        <path d="M0 70 C40 60 70 80 100 66 S160 50 200 60" stroke="#9ccbe4" strokeWidth="1.2" fill="none" />
+        <path d="M30 0 C40 40 60 70 50 120" stroke="#c3d3e2" strokeWidth="0.8" fill="none" />
+        <path d="M120 0 C110 40 130 80 140 120" stroke="#c3d3e2" strokeWidth="0.8" fill="none" />
+        <circle cx="100" cy="64" r="18" stroke="#afc2d5" strokeWidth="0.6" fill="none" />
+        <circle cx="100" cy="64" r="38" stroke="#d4e0ec" strokeWidth="0.6" fill="none" />
       </svg>
-      <p className="relative max-w-xs rounded-2xl border border-line bg-surface/90 px-4 py-3 text-center text-[13px] text-ink-2 shadow-sm">{message}</p>
+      <p className="relative max-w-xs rounded-[14px] border border-line bg-surface/90 px-4 py-3 text-center text-[13px] text-ink-2 shadow-sm">{message}</p>
     </div>
   );
 }

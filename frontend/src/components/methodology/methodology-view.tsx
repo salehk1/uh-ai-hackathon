@@ -21,7 +21,7 @@ export function MethodologyView() {
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 pb-20 pt-8 sm:px-6">
       <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">How it works</p>
-      <h1 className="mt-1 font-display text-[38px] leading-tight tracking-tight text-ink">How QuantHouse answers the price question</h1>
+      <h1 className="mt-1 font-display font-semibold text-[38px] leading-tight tracking-tight text-ink">How QuantHouse answers the price question</h1>
       <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-ink-2">
         A model trained on 2024 Houston listings estimates each home&apos;s fair list price with a calibrated 80% range, validates itself on
         neighborhoods it hasn&apos;t seen, and explains each estimate as an itemized, location-specific receipt. Listing checks and monthly
@@ -147,10 +147,10 @@ function StatsBody({ s }: { s: Stats }) {
                   const isPub = name === pubKey;
                   const isBench = /zestimate/i.test(name);
                   return (
-                    <tr key={name} className={isPub ? "border-t border-line bg-sage-tint" : "border-t border-line"}>
+                    <tr key={name} className={isPub ? "border-t border-line bg-brand-tint" : "border-t border-line"}>
                       <th scope="row" className="px-5 py-3 font-medium text-ink">
                         {name}
-                        {isPub && <span className="ml-2 rounded-full bg-sage-soft px-2 py-0.5 text-[11px] font-semibold text-forest">Published</span>}
+                        {isPub && <span className="ml-2 rounded-full bg-brand-soft px-2 py-0.5 text-[11px] font-semibold text-brand">Published</span>}
                         {isBench && <span className="ml-2 rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-ink-3">Benchmark*</span>}
                       </th>
                       <td className="px-3 py-3 text-right">{usd(v.MAE ?? null)}</td>

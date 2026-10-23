@@ -35,7 +35,7 @@ export function CompsTable({ report, active, onActive }: { report: Report; activ
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-line bg-sage-tint/70">
+            <tr className="border-b border-line bg-brand-tint/70">
               <td className="py-2 pr-2">
                 <span className="grid size-5 place-items-center rounded-full bg-ink text-[10px] font-bold text-white" aria-hidden>★</span>
               </td>
@@ -54,7 +54,7 @@ export function CompsTable({ report, active, onActive }: { report: Report; activ
                 className={clsx("border-b border-line/70 transition-colors last:border-0", active === i && "bg-surface-2")}
               >
                 <td className="py-2 pr-2">
-                  <span className="grid size-5 place-items-center rounded-full bg-forest text-[10px] font-bold text-white">{i + 1}</span>
+                  <span className="grid size-5 place-items-center rounded-full bg-brand text-[10px] font-bold text-white">{i + 1}</span>
                 </td>
                 <th scope="row" className="py-2 pr-3 font-medium text-ink">{usd(c.price)}</th>
                 <td className="py-2 pr-3 text-right text-ink">{perSqft(c.ppsf)}</td>
@@ -64,7 +64,7 @@ export function CompsTable({ report, active, onActive }: { report: Report; activ
                 <td className="py-2 text-right">
                   <Link
                     href={`/property/${c.zpid}`}
-                    className="inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[12px] font-medium text-forest hover:bg-sage-tint"
+                    className="inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[12px] font-medium text-brand hover:bg-brand-tint"
                     onFocus={() => onActive(i)}
                     onBlur={() => onActive(null)}
                   >

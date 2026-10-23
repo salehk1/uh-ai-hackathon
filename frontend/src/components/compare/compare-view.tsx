@@ -56,7 +56,7 @@ export function CompareView() {
 
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-8 sm:px-6">
-      <h1 className="font-display text-[36px] leading-tight tracking-tight text-ink">Compare ZIP codes</h1>
+      <h1 className="font-display font-semibold text-[36px] leading-tight tracking-tight text-ink">Compare ZIP codes</h1>
       <p className="mt-1.5 max-w-2xl text-[14px] leading-relaxed text-ink-2">
         Median asking prices, how many listings sit above or below their estimated range, and recorded school ratings for up to {MAX}{" "}
         ZIP codes. Figures cover listings in the 2024 dataset.
@@ -74,7 +74,7 @@ export function CompareView() {
           <ul className="flex flex-wrap gap-2" aria-label="Selected ZIP codes">
             {zips.map((z) => (
               <li key={z}>
-                <span className="tabular inline-flex h-9 items-center gap-1 rounded-full border border-line bg-sage-tint pl-3 pr-1 text-[13px] font-medium text-ink">
+                <span className="tabular inline-flex h-9 items-center gap-1 rounded-full border border-line bg-brand-tint pl-3 pr-1 text-[13px] font-medium text-ink">
                   {z}
                   <button
                     type="button"
@@ -171,7 +171,7 @@ export function CompareView() {
                             <td className="px-3 py-3 text-right">{pctNumber(r.pct_low)}</td>
                             <td className="px-3 py-3 text-right">{decimal(r.mean_school, 2)}</td>
                             <td className="px-5 py-3 text-right">
-                              <Link href={`/explore?zip=${z}`} className="inline-flex items-center gap-0.5 text-[12.5px] font-medium text-forest hover:underline">
+                              <Link href={`/explore?zip=${z}`} className="inline-flex items-center gap-0.5 text-[12.5px] font-medium text-brand hover:underline">
                                 Explore <ArrowUpRight className="size-3.5" aria-hidden />
                               </Link>
                             </td>
@@ -214,7 +214,7 @@ function Chart({ rows, zips, metric }: { rows: (CompareRow | null)[]; zips: stri
               {v !== null && max > 0 && (
                 <motion.div
                   key={metric.key}
-                  className="h-full rounded-lg bg-forest/85"
+                  className="h-full rounded-lg bg-brand/85"
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.max(1.5, (v / max) * 100)}%` }}
                   transition={{ duration: 0.35, delay: i * 0.04 }}

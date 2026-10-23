@@ -64,7 +64,7 @@ export function MapLegend({
       </div>
       <dl className="mt-3 space-y-1 border-t border-line pt-2.5 text-[11.5px] leading-snug text-ink-3">
         <div className="flex items-start gap-2">
-          <span className="mt-1 size-2 shrink-0 rounded-full bg-sage ring-1 ring-white" aria-hidden />
+          <span className="mt-1 size-2 shrink-0 rounded-full bg-mint ring-1 ring-white" aria-hidden />
           <dd>
             {sampleState === "loading"
               ? "Loading listing sample…"
