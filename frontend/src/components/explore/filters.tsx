@@ -4,6 +4,7 @@ import { RotateCcw } from "lucide-react";
 import { useState } from "react";
 import type { Verdict } from "@/lib/api/schemas";
 import { Button, inputClass } from "../ui";
+import { visibleZipDraft } from "./zip-draft";
 import { hasFilters, LANDMARKS, type ExploreFilters } from "./explore-state";
 
 const PRICE_OPTIONS = [250_000, 350_000, 500_000, 750_000, 1_000_000, 1_500_000];
@@ -30,7 +31,9 @@ export function Filters({
   onReset: () => void;
   mapCenter: () => { lat: number; lon: number } | null;
 }) {
-  const [zipDraft, setZipDraft] = useState(filters.zip ?? "");
+  const [draft, setDraft] = useState({ origin: filters.zip ?? "", value: filters.zip ?? "", editing: false });
+  // An in-progress edit wins over a late URL update from the previous submission.
+  const zipDraft = visibleZipDraft(draft, filters.zip ?? "");
   const zipInvalid = zipDraft !== "" && !/^\d{5}$/.test(zipDraft);
   const nk = nearKey(filters);
 
@@ -85,8 +88,12 @@ export function Filters({
           value={zipDraft}
           aria-invalid={zipInvalid}
           aria-describedby={zipInvalid ? "f-zip-error" : undefined}
-          onChange={(e) => setZipDraft(e.target.value.replace(/\D/g, ""))}
-          onBlur={() => !zipInvalid && zipDraft !== (filters.zip ?? "") && set({ zip: zipDraft || undefined })}
+          onFocus={() => setDraft({ origin: filters.zip ?? "", value: zipDraft, editing: true })}
+          onChange={(e) => setDraft({ origin: filters.zip ?? "", value: e.target.value.replace(/\D/g, ""), editing: true })}
+          onBlur={() => {
+            setDraft({ origin: filters.zip ?? "", value: zipDraft, editing: false });
+            if (!zipInvalid && zipDraft !== (filters.zip ?? "")) set({ zip: zipDraft || undefined });
+          }}
         />
         {zipInvalid && (
           <p id="f-zip-error" className="mt-1 text-xs text-danger">
@@ -125,7 +132,7 @@ export function Filters({
       />
       <div className="col-span-2 flex items-center justify-between pt-0.5">
         <p className="text-xs text-ink-3">Filters apply as you change them.</p>
-        <Button type="button" size="sm" variant="ghost" onClick={onReset} disabled={!hasFilters(filters)}>
+        <Button type="button" size="sm" variant="ghost" onClick={() => { setDraft({ origin: "", value: "", editing: false }); onReset(); }} disabled={!hasFilters(filters)}>
           <RotateCcw className="size-3.5" aria-hidden /> Reset filters
         </Button>
       </div>

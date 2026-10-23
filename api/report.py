@@ -13,7 +13,6 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 DOWN_PAYMENT = 0.20
 TERM_MONTHS = 360
-FAR_BELOW_Q10 = 0.85        # asking < 85% of q10 -> warning
 SIZE_RATIO = (0.5, 2.0)     # sqft vs. median of same-bed neighbors
 MIN_SQFT_PER_BED = 200
 ENGAGEMENT_Z = 3.0
@@ -35,7 +34,7 @@ def comps(ref, tree, xy_fn, lat, lon, home_type, beds, sqft, zpid):
     cand = ref.iloc[idx]
     cand = cand[cand.zpid != zpid]
     rules = [("same type, beds ±1, sqft ±30%", 0.3, 1, True), ("same type, beds ±1, sqft ±50%", 0.5, 1, True),
-             ("any type, beds ±2, sqft ±50%", 0.5, 2, False)]
+             ("same type, beds ±2, sqft ±50% (sparse matches retained)", 0.5, 2, True)]
     for desc, tol, bd, same_type in rules:
         m = np.ones(len(cand), bool)
         if sqft:
@@ -55,24 +54,14 @@ def comps(ref, tree, xy_fn, lat, lon, home_type, beds, sqft, zpid):
     return out, desc
 
 
-def same_bed_neighbors(ref, tree, xy_fn, lat, lon, beds, n=30):
+def same_bed_neighbors(ref, tree, xy_fn, lat, lon, beds, home_type, zpid, n=30):
     _, idx = tree.query(xy_fn([lat], [lon])[0], k=min(400, len(ref)))
     c = ref.iloc[idx]
-    return c[c.bedrooms == beds].head(n)
+    return c[(c.bedrooms == beds) & (c.homeType == home_type) & (c.zpid != zpid)].head(n)
 
 
 def verification(d, home, asking, q10, ref, tree, xy_fn):
     sig = []
-
-    # 1. Asking far below the fair range
-    if asking is None or q10 is None:
-        sig.append({"name": "asking_far_below_range", "status": "unknown",
-                    "evidence": "No calibrated fair range for this listing (outside the price model's scope)."})
-    else:
-        ratio = asking / q10
-        sig.append({"name": "asking_far_below_range", "status": "warning" if ratio < FAR_BELOW_Q10 else "ok",
-                    "evidence": f"Asking ${asking:,.0f} is {ratio:.0%} of the low end of the fair range (q10 ${q10:,.0f}); "
-                                f"warning below {FAR_BELOW_Q10:.0%}. Prices far under comparable homes are a common lure in listing scams."})
 
     # 2. Duplicate photos / description across other listings
     if not d.get("n_photo_ids"):
@@ -110,19 +99,19 @@ def verification(d, home, asking, q10, ref, tree, xy_fn):
     if not sqft or beds is None or d.get("lat") is None:
         sig.append({"name": "size_vs_comps", "status": "unknown", "evidence": "Square footage or bedroom count not reported."})
     else:
-        nb = same_bed_neighbors(ref, tree, xy_fn, d["lat"], d["lon"], beds)
+        nb = same_bed_neighbors(ref, tree, xy_fn, d["lat"], d["lon"], beds, d.get("home_type"), d["zpid"])
         issues, ev = [], []
         if beds > 0 and sqft / beds < MIN_SQFT_PER_BED:
             issues.append(f"only {sqft / beds:.0f} sqft per bedroom")
         if len(nb) >= 5:
             med = float(nb.livingArea.median())
             r = sqft / med
-            ev.append(f"{sqft:,.0f} sqft vs median {med:,.0f} sqft for {len(nb)} nearby {beds:.0f}-bed homes ({r:.2f}x)")
+            ev.append(f"{sqft:,.0f} sqft vs median {med:,.0f} sqft for {len(nb)} nearby same-type {beds:.0f}-bed homes ({r:.2f}x)")
             if not SIZE_RATIO[0] <= r <= SIZE_RATIO[1]:
                 issues.append(f"size is {r:.2f}x the local {beds:.0f}-bed median")
         sig.append({"name": "size_vs_comps", "status": "warning" if issues else ("ok" if len(nb) >= 5 else "unknown"),
                     "evidence": "; ".join(issues + ev) + "." if (issues or ev) else
-                    f"Fewer than 5 nearby {beds:.0f}-bed homes to compare."})
+                    f"Fewer than 5 nearby same-type {beds:.0f}-bed homes to compare."})
 
     # 5. Days on market vs. views / favorites
     z, dom, views, favs = _num(d.get("engagement_z")), _num(d.get("days_on_zillow")), _num(d.get("page_views")), _num(d.get("favorites"))
@@ -154,7 +143,7 @@ def costs(d, asking, median_rate):
         assumptions.append(f"30-yr fixed rate {rate:.3f}% (Zillow Home Loans rate shown on the listing, snapshot {str(d.get('scraped_at'))[:10]}).")
     principal = asking * (1 - DOWN_PAYMENT)
     r = rate / 100 / 12
-    mortgage = principal * r * (1 + r) ** TERM_MONTHS / ((1 + r) ** TERM_MONTHS - 1)
+    mortgage = principal / TERM_MONTHS if r == 0 else principal * r * (1 + r) ** TERM_MONTHS / ((1 + r) ** TERM_MONTHS - 1)
     assumptions.append(f"{DOWN_PAYMENT:.0%} down (${asking * DOWN_PAYMENT:,.0f}); loan ${principal:,.0f}; principal and interest only; no PMI at 20% down.")
 
     tax_rate = _num(d.get("property_tax_rate"))
@@ -229,6 +218,7 @@ def build(d, home, asking_override, ref, tree, xy_fn, median_rate):
     limitations = [
         "Asking prices only; no closed-sale prices. 'Fair' means consistent with comparable listings.",
         "One snapshot (June 2024); no market trend adjustment.",
+        "Price disagreement is not independent evidence of fraud or a verified bargain.",
         "The 80% range is calibrated per home type across Houston; individual neighborhoods may be covered more or less often.",
         "Verification signals are evidence for a human to check, not a fraud score.",
         "No inspection, title, flood-zone, or permit data.",

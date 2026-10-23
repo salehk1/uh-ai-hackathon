@@ -44,24 +44,6 @@ function costs(asking: number, ratePct: number, taxPct: number, hoa: number | "u
   };
 }
 
-function farBelowSignal(asking: number, q10: number | "unknown"): Signal {
-  if (q10 === "unknown") {
-    return { name: "asking_far_below_range", status: "unknown", evidence: "No fair range for this listing, so the asking price can't be compared with it." };
-  }
-  const ratio = Math.round((asking / q10) * 100);
-  return asking < 0.85 * q10
-    ? {
-        name: "asking_far_below_range",
-        status: "warning",
-        evidence: `Asking ${usd(asking)} is ${ratio}% of the low end of the fair range (q10 ${usd(q10)}); warning below 85%. Prices far under comparable homes are a common lure in listing scams.`,
-      }
-    : {
-        name: "asking_far_below_range",
-        status: "ok",
-        evidence: `Asking ${usd(asking)} is ${ratio}% of the low end of the fair range (q10 ${usd(q10)}); warning below 85%.`,
-      };
-}
-
 /** Recompute everything that depends on the asking price, as the backend does for `asking_price`. */
 function withAsking(rep: Report, asking: number, rate: number, taxPct: number): Report {
   const p = rep.price;
@@ -76,7 +58,7 @@ function withAsking(rep: Report, asking: number, rate: number, taxPct: number): 
       ...(typeof p.fair === "number" ? { asking_vs_fair_pct: r1(((asking - p.fair) / p.fair) * 100) } : {}),
     },
     verification: {
-      signals: rep.verification.signals.map((s) => (s.name === "asking_far_below_range" ? farBelowSignal(asking, p.q10) : s)),
+      signals: rep.verification.signals.filter((s) => s.name !== "asking_far_below_range"),
     },
     costs: costs(asking, rate, taxPct, rep.costs.monthly.hoa, rep.costs.unknowns),
   };
@@ -134,7 +116,6 @@ function synthetic(h: Home, idx: number): { report: Report; rate: number; tax: n
   const type = scope ? h.home_type : "MULTI_FAMILY";
 
   const signals: Signal[] = [
-    farBelowSignal(asking, q10),
     dupPhotos
       ? {
           name: "duplicate_photos",
@@ -267,6 +248,7 @@ export function report(req: ReportRequest): { status: number; body: unknown } {
     if (matches.length) found = byZpid(matches[0].zpid);
   }
   if (!found) return { status: 404, body: { detail: "listing not found" } };
-  const out = req.asking_price !== undefined ? withAsking(found.report, req.asking_price, found.rate, found.tax) : found.report;
+  const result = req.asking_price !== undefined ? withAsking(found.report, req.asking_price, found.rate, found.tax) : found.report;
+  const out = { ...result, verification: { signals: result.verification.signals.filter((s) => s.name !== "asking_far_below_range") } };
   return { status: 200, body: matches.length > 1 ? { ...out, address_matches: matches } : out };
 }
