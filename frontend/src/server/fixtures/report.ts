@@ -234,6 +234,7 @@ function synthetic(h: Home, idx: number): { report: Report; rate: number; tax: n
       ...SAMPLE.sources.slice(1),
     ],
     limitations: SAMPLE.limitations,
+    photos: [], // synthetic listings have no photos; the page shows the labelled illustration
   };
   return { report, rate: r2(rate), tax };
 }

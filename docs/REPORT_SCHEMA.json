@@ -367,6 +367,33 @@
     "address_matches": {
       "type": "array",
       "description": "present only when an address matched several listings"
+    },
+    "photos": {
+      "type": "array",
+      "description": "The listing's own photos in listing order (scraped Zillow CDN URLs from the dataset snapshot; empty when the snapshot has none). thumb_url is ~800px wide for previews, full_url the largest copy.",
+      "items": {
+        "type": "object",
+        "required": [
+          "thumb_url",
+          "full_url"
+        ],
+        "properties": {
+          "thumb_url": {
+            "type": "string",
+            "pattern": "^https://photos\\.zillowstatic\\.com/"
+          },
+          "full_url": {
+            "type": "string",
+            "pattern": "^https://photos\\.zillowstatic\\.com/"
+          },
+          "full_width": {
+            "type": "integer"
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "chat_visual": "POST /chat returns visuals[] with {type:'report', data:<this object>} when the agent calls the report tool",

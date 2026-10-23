@@ -47,6 +47,17 @@ TREE = sp.cKDTree(REF_XY)
 Y_RANGE = (float(REF.y.min()), float(REF.y.max()))
 STATS = {k: tuple(v) for k, v in META["stats"].items()}
 BCOLS = [f"b_{c}" for c in ["intercept"] + META["vars"]]
+# Listing photos for /report (extract_photos.py): the scraped Zillow CDN URLs, in listing order
+_PHOTOS_PATH = ROOT / "data/listing_photos.parquet"
+
+
+def listing_photos(zpid):
+    if not _PHOTOS_PATH.exists():
+        return []
+    rows = (pd.read_parquet(_PHOTOS_PATH, filters=[("zpid", "==", zpid)])
+            .sort_values("idx").drop(columns=["zpid", "idx"]).to_dict("records"))
+    return [{k: (int(v) if k == "full_width" else v) for k, v in p.items() if v is not None and v == v} for p in rows]
+
 
 app = FastAPI(title="Houston Price Receipt")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -265,6 +276,7 @@ def report(r: ReportIn):
     d = clean(rows[0])
     h = q("select * from homes where zpid = %s", (d["zpid"],))
     out = report_mod.build(d, clean(h[0]) if h else None, r.asking_price, REF, TREE, sp.xy_km, median_rate())
+    out["photos"] = listing_photos(int(d["zpid"]))
     if len(matches) > 1:
         out["address_matches"] = matches
     return out

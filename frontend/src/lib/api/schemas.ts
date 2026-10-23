@@ -291,6 +291,27 @@ export const signalSchema = z.object({
 export type Signal = z.infer<typeof signalSchema>;
 export type SignalStatus = Signal["status"];
 
+/** One of the listing's own photos, as scraped (Zillow CDN). `thumb_url` ~800px wide; `full_url` the largest copy. */
+const PHOTO_HOSTS = ["photos.zillowstatic.com"];
+const photoUrl = z
+  .string()
+  .url()
+  .refine((u) => {
+    try {
+      const x = new URL(u);
+      return x.protocol === "https:" && PHOTO_HOSTS.includes(x.hostname);
+    } catch {
+      return false;
+    }
+  }, "Unexpected photo host");
+export const listingPhotoSchema = z.object({
+  thumb_url: photoUrl,
+  full_url: photoUrl,
+  full_width: num.optional(),
+  caption: z.string().nullish(),
+});
+export type ListingPhoto = z.infer<typeof listingPhotoSchema>;
+
 export const reportSchema = z.object({
   listing: reportListingSchema,
   price: z.object({
@@ -321,6 +342,14 @@ export const reportSchema = z.object({
   sources: z.array(z.object({ name: z.string(), detail: z.string().optional(), license: z.string().optional() })),
   limitations: z.array(z.string()),
   address_matches: z.array(z.object({ zpid: z.number().int(), address: z.string() })).optional(),
+  // Additive: older backends omit it. Invalid entries are dropped rather than failing the whole report.
+  photos: z
+    .array(z.unknown())
+    .optional()
+    .transform((xs) => (xs ?? []).flatMap((x) => {
+      const p = listingPhotoSchema.safeParse(x);
+      return p.success ? [p.data] : [];
+    })),
 });
 export type Report = z.infer<typeof reportSchema>;
 

@@ -35,7 +35,7 @@ import { StatusChip, UnknownValue } from "../report/primitives";
 import { VerificationSection } from "../report/verification";
 import { Button, Card, ErrorState, LinkButton, Notice, SectionHeading, inputClass } from "../ui";
 import { VerdictBadge } from "../verdict-badge";
-import { HouseIllustration } from "./house-illustration";
+import { PhotoGallery } from "./photo-gallery";
 import { RangeBar } from "./range-bar";
 import { ReportSkeleton } from "./report-skeleton";
 
@@ -142,24 +142,10 @@ function ReportView({
       <BackLink href={backHref} />
 
       {/* identity */}
-      <header className="blueprint mt-4 grid gap-5 rounded-[24px] border border-line p-4 sm:p-6 lg:grid-cols-[1.4fr_0.6fr] lg:gap-7">
-        <motion.figure
-          initial={{ opacity: 0, scale: 0.985 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative overflow-hidden rounded-[18px] border border-line bg-sky lg:order-last lg:min-h-[280px]"
-        >
-          <div className="aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto">
-            <HouseIllustration seed={l.zpid} homeType={l.home_type ?? null} />
-          </div>
-          <figcaption className="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full bg-surface/90 px-2.5 py-1 text-[11.5px] text-ink-3 shadow-sm backdrop-blur">
-            <Info className="size-3 shrink-0" aria-hidden />
-            <span className="truncate">
-              Illustration.{" "}
-              {isKnown(l.photo_count) ? `The listing has ${l.photo_count} photos on Zillow; ` : ""}
-              photos aren&apos;t served by the API.
-            </span>
-          </figcaption>
-        </motion.figure>
+      <header className="blueprint mt-4 grid gap-5 rounded-[24px] border border-line p-4 sm:p-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-7">
+        <motion.div initial={{ opacity: 0, scale: 0.985 }} animate={{ opacity: 1, scale: 1 }} className="self-start lg:order-last">
+          <PhotoGallery key={l.zpid} photos={r.photos} zpid={l.zpid} homeType={l.home_type ?? null} photoCount={isKnown(l.photo_count) ? l.photo_count : null} />
+        </motion.div>
 
         <div className="flex flex-col">
           <p className="tabular text-[13px] text-ink-3">

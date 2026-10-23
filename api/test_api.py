@@ -44,7 +44,9 @@ def report_ok(j):
     s = {x["status"] for x in j["verification"]["signals"]}
     rsum = sum(i["usd"] for i in p["receipt"])
     assert not p["receipt"] or abs(rsum - p["fair"]) <= 1, "receipt must sum to fair"
-    return (f"verdict={p['verdict']} fair={p['fair']} q10={p['q10']} q90={p['q90']} comps={len(p['comps'])} "
+    ph = j["photos"]
+    assert all(q["thumb_url"].startswith("https://photos.zillowstatic.com/fp/") for q in ph)
+    return (f"photos={len(ph)} verdict={p['verdict']} fair={p['fair']} q10={p['q10']} q90={p['q90']} comps={len(p['comps'])} "
             f"signals={sorted(s)} total_known=${j['costs']['monthly']['total_known']:,.0f} schema=valid")
 
 

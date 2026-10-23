@@ -29,7 +29,7 @@ COPY features.py receipt.py spatial.py load.py ./
 COPY db/ db/
 COPY api/ api/
 COPY results/ results/
-COPY data/features.parquet data/gwr_coefs.parquet data/predictions.parquet data/listing_details.parquet data/
+COPY data/features.parquet data/gwr_coefs.parquet data/predictions.parquet data/listing_details.parquet data/listing_photos.parquet data/
 COPY data/models/ data/models/
 
 COPY --from=web /usr/local/bin/node /usr/local/bin/node
