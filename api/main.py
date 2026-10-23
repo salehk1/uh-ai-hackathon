@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import receipt  # noqa: E402
 from api import report as report_mod  # noqa: E402
+from api.recommendations import FitRequest, recommend  # noqa: E402
 import spatial as sp  # noqa: E402
 from features import HOME_TYPES, POIS, TEXT_FLAGS, haversine_km  # noqa: E402
 
@@ -280,6 +281,16 @@ def report(r: ReportIn):
     if len(matches) > 1:
         out["address_matches"] = matches
     return out
+
+
+@app.post("/recommendations")
+def recommendations(p: FitRequest):
+    if not FitRequest.validate_zips(p):
+        raise HTTPException(422, "ZIP codes must be five-digit strings")
+    # Rank the full modeled dataset, not the first 20 /search results.
+    rows = q("""select d.*, h.school_mean from homes h
+                join listing_details d on d.zpid = h.zpid""")
+    return recommend(clean(rows), p, median_rate())
 
 
 # ---------------------------------------------------------------- agent

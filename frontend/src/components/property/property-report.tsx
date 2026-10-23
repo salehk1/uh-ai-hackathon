@@ -263,7 +263,7 @@ function QuestionSummary({ report: r }: { report: Report }) {
       <SummaryCard href="#price" step={1} icon={<CircleDollarSign className="size-4" />} title="Price">
         <VerdictBadge label={r.price.verdict} size="sm" />
         <p className="tabular mt-1.5 text-[12.5px] text-ink-2">
-          {isKnown(r.price.fair) ? `${usdCompact(r.price.asking)} vs fair ${usdCompact(r.price.fair)}` : "Outside model scope"}
+          {isKnown(r.price.fair) ? `${usdCompact(r.price.asking)} vs model ${usdCompact(r.price.fair)}` : "Outside model scope"}
         </p>
       </SummaryCard>
       <SummaryCard href="#verification" step={2} icon={<ShieldCheck className="size-4" />} title="Listing checks">
@@ -344,8 +344,8 @@ function PriceSection({
           </p>
         )}
         <dl className="mt-5 grid gap-5 sm:grid-cols-3">
-          <BigNumber label={offer !== undefined ? "Your offer" : "Asking price"}>{usd(p.asking)}</BigNumber>
-          <BigNumber label="Fair price" tone="brand">
+          <BigNumber label={offer !== undefined ? "Your offer" : "Recorded asking price · June 2024"}>{usd(p.asking)}</BigNumber>
+          <BigNumber label="Model-estimated 2024 asking price" tone="brand">
             {isKnown(p.fair) ? usd(p.fair) : <UnknownValue reason={outOfScopeReason} className="text-[14px]" />}
           </BigNumber>
           <BigNumber label="Asking vs fair">
@@ -380,12 +380,12 @@ function PriceSection({
             <h3 className="mb-1 text-sm font-semibold text-ink">Price receipt</h3>
             <p className="mb-4 text-[12.5px] leading-relaxed text-ink-3">
               Starts from the neighborhood baseline; each line is a location-specific contribution, and the last line is the ML adjustment.
-              Lines sum exactly to the fair price.
+              Lines sum exactly to the model-estimated 2024 asking price.
             </p>
-            <ReceiptWaterfall receipt={receipt} totalLabel="Fair price" />
+            <ReceiptWaterfall receipt={receipt} totalLabel="Model estimate" />
           </Card>
           <Card className="p-5 sm:p-6">
-            <ReceiptTable receipt={receipt} totalLabel="Fair price" />
+            <ReceiptTable receipt={receipt} totalLabel="Model estimate" />
           </Card>
         </div>
       ) : (
@@ -470,7 +470,7 @@ function OfferForm({
         </Button>
       )}
       <p id={error ? "offer-error" : "offer-hint"} className={clsx("basis-full text-xs", error ? "text-danger" : "text-ink-3")}>
-        {error ?? "Recomputes the verdict, the asking-price checks and the monthly costs for your number. The fair price and range don't change."}
+        {error ?? "Recomputes the price comparison and monthly costs for your number. Independent listing checks, the model estimate and range do not change."}
       </p>
     </form>
   );

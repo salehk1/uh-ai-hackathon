@@ -1,7 +1,8 @@
 "use client";
 
 import { NavigationControl, type GeoJSONSource, type LngLatBoundsLike, type Map as MLMap, type MapGeoJSONFeature, type ExpressionSpecification } from "maplibre-gl";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { listingBounds, shouldFitZip } from "@/lib/map-fit";
 import type { MapMetric, MapResponse, SearchHome } from "@/lib/api/schemas";
 import { C, PPSF_STOPS, RESIDUAL_STOPS, VERDICT_COLOR } from "@/lib/palette";
 import { BaseMap, MapFallback, setExtrusionsVisible, type MapView } from "../map/base-map";
@@ -15,6 +16,9 @@ type Props = {
   flat: boolean;
   initialView: MapView;
   fitKey: string;
+  zip?: string;
+  sampleLoaded: boolean;
+  restoreInitial: boolean;
   /** Request a camera move to a listing; `nonce` lets the same listing be focused twice. */
   focus: { lon: number; lat: number; nonce: number } | null;
   reducedMotion: boolean;
@@ -51,6 +55,7 @@ function resultsGeoJSON(rs: SearchHome[]): GeoJSON.FeatureCollection {
 
 export function ExploreMap(p: Props) {
   const mapRef = useRef<MLMap | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const prev = useRef<{ hovered: number | null; selected: number | null }>({ hovered: null, selected: null });
   const handlers = useRef(p);
   useEffect(() => {
@@ -181,7 +186,6 @@ export function ExploreMap(p: Props) {
   }, []);
 
   // data → sources
-  const ready = useRef(false);
   const sync = useCallback(() => {
     const m = mapRef.current;
     if (!m) return;
@@ -192,8 +196,8 @@ export function ExploreMap(p: Props) {
   }, [p.sample, p.results, p.selected, setState]);
 
   useEffect(() => {
-    if (ready.current) sync();
-  }, [sync]);
+    if (mapReady) sync();
+  }, [sync, mapReady]);
 
   // metric → paint
   useEffect(() => {
@@ -228,25 +232,25 @@ export function ExploreMap(p: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.focus?.nonce]);
 
-  // fit to results when the filter set changes (not on first load, which restores the URL view)
+  // ZIP camera moves are independent of metric/filter/pan updates.
   const lastFit = useRef<string | null>(null);
   useEffect(() => {
     const m = mapRef.current;
-    if (!m) return;
-    if (lastFit.current === null) {
-      lastFit.current = p.fitKey;
+    const zip = p.zip ?? "";
+    if (!m || !mapReady || !p.sampleLoaded) return;
+    if (lastFit.current === null && p.restoreInitial) {
+      lastFit.current = zip;
       return;
     }
-    if (lastFit.current === p.fitKey || !p.results.length) return;
-    lastFit.current = p.fitKey;
-    const lons = p.results.map((r) => r.lon);
-    const lats = p.results.map((r) => r.lat);
-    const bounds: LngLatBoundsLike = [
-      [Math.min(...lons), Math.min(...lats)],
-      [Math.max(...lons), Math.max(...lats)],
-    ];
-    m.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: p.reducedMotion ? 0 : 700 });
-  }, [p.fitKey, p.results, p.reducedMotion]);
+    if (!shouldFitZip(mapReady, p.sampleLoaded, zip, lastFit.current, false)) return;
+    const points = (p.sample?.features ?? [])
+      .filter((f) => !zip || f.properties.zipcode === zip)
+      .map((f) => f.geometry.coordinates);
+    const bounds = listingBounds(points);
+    lastFit.current = zip;
+    if (!bounds) return;
+    m.fitBounds(bounds as LngLatBoundsLike, { padding: window.innerWidth < 640 ? 45 : 80, maxZoom: 14, duration: p.reducedMotion ? 0 : 700 });
+  }, [mapReady, p.zip, p.sampleLoaded, p.sample, p.restoreInitial, p.reducedMotion]);
 
   return (
     <BaseMap
@@ -254,7 +258,7 @@ export function ExploreMap(p: Props) {
       label="Map of sampled Houston listings and matching search results"
       onLoad={(m) => {
         const c = onLoad(m);
-        ready.current = true;
+        setMapReady(true);
         sync();
         return c;
       }}

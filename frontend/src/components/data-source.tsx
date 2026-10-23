@@ -14,7 +14,12 @@ const useHydrated = () => useBrowserValue(() => true, false);
 export function DataSourceBanner() {
   const { data } = useSource();
   const hydrated = useHydrated();
-  if (!hydrated || !data || data.mode === "live") return null;
+  if (!hydrated || !data) return null;
+  if (data.mode === "live") return (
+    <div className="border-b border-line bg-surface px-4 py-2 text-center text-xs text-ink-2">
+      Connected API · historical dataset. Recorded asking prices from June 2024, not current availability, Zestimates or closed-sale prices.
+    </div>
+  );
   if (data.mode === "fixtures") {
     return (
       <div role="status" className="border-b border-amber/30 bg-amber-soft text-[13px] text-ink">
@@ -65,7 +70,7 @@ export function DataSourcePill() {
         title={down ? `Can't reach ${data.backend_host}` : `Connected to ${data.backend_host}`}
       >
         <span className={`size-1.5 rounded-full ${down ? "bg-danger" : health.isSuccess ? "bg-brand" : "bg-line-strong"}`} aria-hidden />
-        {down ? "API offline" : health.isSuccess ? `Live API · ${health.data.data.homes.toLocaleString("en-US")} homes` : "Live API"}
+        {down ? "API offline" : health.isSuccess ? "Connected API · historical dataset" : "Connecting API"}
       </span>
     );
   }

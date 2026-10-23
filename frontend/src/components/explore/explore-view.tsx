@@ -34,7 +34,8 @@ export function ExploreView() {
   const searchReq = useMemo(() => toSearchRequest(filters), [filters]);
   const search = useSearch(searchReq);
   const sample = useMapSample(metric, filters.zip);
-  const results = useMemo(() => search.data?.data.homes ?? [], [search.data]);
+  const results = useMemo(() => search.isPlaceholderData ? [] : search.data?.data.homes ?? [], [search.data, search.isPlaceholderData]);
+  const [restoreInitial] = useState(state.view !== null);
   const fitKey = JSON.stringify(searchReq);
 
   // ---- list scroll restoration (Back from a report returns to the same spot)
@@ -109,7 +110,6 @@ export function ExploreView() {
           </div>
           <div className="mt-3 rounded-2xl border border-line bg-surface p-3.5 shadow-sm">
             <Filters
-              key={filters.zip ?? ""}
               filters={filters}
               onChange={setFilters}
               onReset={reset}
@@ -193,6 +193,9 @@ export function ExploreView() {
           flat={flat}
           initialView={initialView}
           fitKey={fitKey}
+          zip={filters.zip}
+          restoreInitial={restoreInitial}
+          sampleLoaded={sample.isSuccess}
           focus={focus}
           reducedMotion={reduced}
           onSelect={select}
@@ -245,6 +248,10 @@ export function ExploreView() {
             </button>
           </div>
         </div>
+
+        {filters.zip && sample.isSuccess && !sample.data.data.features.some((f) => f.properties.zipcode === filters.zip && Number.isFinite(f.geometry.coordinates[0]) && Number.isFinite(f.geometry.coordinates[1])) && (
+          <div role="status" className="absolute bottom-24 left-4 right-4 rounded-xl border border-line bg-surface p-4 text-sm text-ink">No plotted listings for ZIP {filters.zip}. This camera view does not represent that ZIP.</div>
+        )}
 
         {sample.isError && (
           <div className="absolute bottom-24 left-1/2 z-10 w-[min(26rem,calc(100%-2rem))] -translate-x-1/2">
