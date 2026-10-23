@@ -23,6 +23,7 @@ from pydantic import BaseModel
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import receipt  # noqa: E402
+from api import report as report_mod  # noqa: E402
 import spatial as sp  # noqa: E402
 from features import HOME_TYPES, POIS, TEXT_FLAGS, haversine_km  # noqa: E402
 
@@ -217,6 +218,45 @@ def stats():
     return out
 
 
+class ReportIn(BaseModel):
+    zpid: Optional[int] = None
+    address: Optional[str] = None
+    asking_price: Optional[float] = None
+
+
+_MEDIAN_RATE = None
+
+
+def median_rate():
+    global _MEDIAN_RATE
+    if _MEDIAN_RATE is None:
+        _MEDIAN_RATE = float(q("select percentile_cont(0.5) within group (order by rate_30yr) as r from listing_details")[0]["r"])
+    return _MEDIAN_RATE
+
+
+@app.post("/report")
+def report(r: ReportIn):
+    """Single-listing due-diligence report (contract: docs/REPORT_SCHEMA.json)."""
+    matches = []
+    if r.zpid is not None:
+        rows = q("select * from listing_details where zpid = %s", (r.zpid,))
+    elif r.address:
+        street = r.address.split(",")[0].strip()
+        rows = q("""select * from listing_details where lower(street_address) like lower(%s)
+                    order by length(street_address) limit 5""", (f"%{street}%",))
+        matches = [{"zpid": x["zpid"], "address": f"{x['street_address']}, {x['city']} {x['zipcode']}"} for x in rows]
+    else:
+        raise HTTPException(400, "provide zpid or address")
+    if not rows:
+        raise HTTPException(404, "listing not found")
+    d = clean(rows[0])
+    h = q("select * from homes where zpid = %s", (d["zpid"],))
+    out = report_mod.build(d, clean(h[0]) if h else None, r.asking_price, REF, TREE, sp.xy_km, median_rate())
+    if len(matches) > 1:
+        out["address_matches"] = matches
+    return out
+
+
 # ---------------------------------------------------------------- agent
 LLM = OpenAI(base_url="https://api.featherless.ai/v1", api_key=os.environ["FEATHERLESS_API_KEY"], timeout=60)
 MODEL = "Qwen/Qwen3-32B"
@@ -229,6 +269,9 @@ zip codes or statistics; if tools don't cover the question, say so. Be concise (
 Each home has a calibrated 80% fair-price range [q10, q90] from quantile models.
 label/verdict: 'high' = asking above q90, 'low' = asking below q10, else 'expected'.
 'residual_pct' = (asking - fair)/fair. Never state a probability or confidence % the tools did not return.
+For a single listing use the report tool, and keep its three answers separate: price reasonableness,
+listing verification (ok/warning/unknown signals; never turn them into a fraud probability), and
+monthly cost (state assumptions; say "unknown" where the report says unknown).
 Downtown Houston is at lat 29.7604, lon -95.3698; Galleria 29.7390,-95.4631; Texas Medical Center 29.7069,-95.4011."""
 
 
@@ -251,6 +294,9 @@ TOOLS = [
         {"zips": {"type": "string", "description": "comma-separated, e.g. 77002,77019"}}, ["zips"]),
     _fn("map", "Map listings colored by a metric, optionally for one zip.",
         {"metric": {"type": "string", "enum": ["residual_pct", "ppsf", "label"]}, "zip": STR}),
+    _fn("report", "Full due-diligence report for ONE listing (by zpid or street address): price vs calibrated fair "
+        "range with receipt and comps, listing verification signals, monthly cost breakdown with unknowns.",
+        {"zpid": {"type": "integer"}, "address": STR, "asking_price": NUM}),
     _fn("stats", "Model leaderboard (MAE, MAPE, R2 vs Zestimate) and spatial stats (Moran's I).", {}),
 ]
 
@@ -284,6 +330,12 @@ def run_tool(name, args):
                            median_ppsf=float(props.ppsf.median()),
                            median_residual_pct=float(props.residual_pct.median()))
         return summary, {"type": "map", "data": gj}
+    if name == "report":
+        r = report(ReportIn(**args))
+        slim = {**r, "price": {**r["price"], "comps": [{k: c[k] for k in ("zpid", "price", "ppsf", "dist_km", "beds", "sqft")}
+                                                        for c in r["price"]["comps"]]}}
+        slim.pop("sources", None)
+        return slim, {"type": "report", "data": r}
     if name == "stats":
         r = stats()
         b = r["leaderboard"]

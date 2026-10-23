@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Housing due-diligence report",
+  "description": "POST /report. Three SEPARATE questions: price reasonableness, listing verification, cost transparency. No probability or confidence scores; missing evidence is the string \"unknown\".",
+  "endpoint": {
+    "method": "POST",
+    "path": "/report",
+    "request": {
+      "type": "object",
+      "properties": {
+        "zpid": {
+          "type": "integer"
+        },
+        "address": {
+          "type": "string",
+          "description": "street address; matched case-insensitively on the street part"
+        },
+        "asking_price": {
+          "type": "number",
+          "description": "optional override; recomputes verdict and costs"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "zpid"
+          ]
+        },
+        {
+          "required": [
+            "address"
+          ]
+        }
+      ]
+    },
+    "errors": {
+      "400": "neither zpid nor address",
+      "404": "listing not found"
+    }
+  },
+  "type": "object",
+  "required": [
+    "listing",
+    "price",
+    "verification",
+    "costs",
+    "sources",
+    "limitations"
+  ],
+  "properties": {
+    "listing": {
+      "type": "object",
+      "description": "Facts as listed on Zillow; any field may be null.",
+      "properties": {
+        "zpid": {},
+        "street_address": {},
+        "city": {},
+        "state": {},
+        "zipcode": {},
+        "home_type": {},
+        "beds": {},
+        "baths": {},
+        "living_area": {},
+        "year_built": {},
+        "lot_acres": {},
+        "lat": {},
+        "lon": {},
+        "days_on_zillow": {},
+        "page_views": {},
+        "favorites": {},
+        "agent_name": {},
+        "broker_name": {},
+        "mls_id": {},
+        "photo_count": {},
+        "date_posted": {},
+        "hdp_url": {},
+        "list_price": {}
+      }
+    },
+    "price": {
+      "type": "object",
+      "required": [
+        "asking",
+        "fair",
+        "q10",
+        "q90",
+        "verdict",
+        "receipt",
+        "comps"
+      ],
+      "properties": {
+        "asking": {
+          "type": "number"
+        },
+        "fair": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "q10": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "q90": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "verdict": {
+          "type": "string",
+          "enum": [
+            "high",
+            "expected",
+            "low",
+            "unknown"
+          ],
+          "description": "high: asking > q90; low: asking < q10; unknown: listing outside model scope"
+        },
+        "asking_vs_fair_pct": {
+          "type": "number"
+        },
+        "range_coverage": {
+          "type": "number",
+          "description": "measured out-of-fold share of homes whose asking price falls inside [q10,q90] (target 0.80); a property of the model, not of this listing"
+        },
+        "reason": {
+          "type": "string",
+          "description": "present when verdict is unknown"
+        },
+        "receipt": {
+          "type": "array",
+          "description": "items sum to fair",
+          "items": {
+            "type": "object",
+            "required": [
+              "feature",
+              "pct",
+              "usd"
+            ],
+            "properties": {
+              "feature": {
+                "type": "string",
+                "description": "baseline | livingArea | age | school_mean | dist_downtown | bedrooms | bathrooms | other"
+              },
+              "label": {
+                "type": "string"
+              },
+              "usd": {
+                "type": "number"
+              },
+              "pct": {
+                "type": "number",
+                "description": "usd / fair x 100"
+              }
+            }
+          }
+        },
+        "comps": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "zpid",
+              "price",
+              "ppsf",
+              "dist_km",
+              "beds",
+              "baths",
+              "sqft"
+            ],
+            "properties": {
+              "zpid": {
+                "type": "integer"
+              },
+              "price": {
+                "type": "number"
+              },
+              "ppsf": {
+                "type": "number"
+              },
+              "dist_km": {
+                "type": "number"
+              },
+              "beds": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "baths": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "sqft": {
+                "type": "number"
+              },
+              "home_type": {
+                "type": "string"
+              },
+              "lat": {
+                "type": "number"
+              },
+              "lon": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "comps_rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "similarity rule actually used (relaxed if too few matches)"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "status",
+              "evidence"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "asking_far_below_range",
+                  "duplicate_photos",
+                  "duplicate_description",
+                  "agent_broker_attribution",
+                  "size_vs_comps",
+                  "engagement_anomaly",
+                  "address_disclosure"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "warning",
+                  "unknown"
+                ]
+              },
+              "evidence": {
+                "type": "string"
+              },
+              "related_zpids": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "costs": {
+      "type": "object",
+      "properties": {
+        "monthly": {
+          "type": "object",
+          "required": [
+            "mortgage",
+            "tax",
+            "hoa",
+            "insurance",
+            "total_known"
+          ],
+          "properties": {
+            "mortgage": {
+              "type": "number",
+              "description": "principal + interest, 30-yr fixed, 20% down"
+            },
+            "tax": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            "hoa": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            "insurance": {
+              "const": "unknown"
+            },
+            "total_known": {
+              "type": "number",
+              "description": "sum of the numeric items only"
+            }
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "address_matches": {
+      "type": "array",
+      "description": "present only when an address matched several listings"
+    }
+  },
+  "chat_visual": "POST /chat returns visuals[] with {type:'report', data:<this object>} when the agent calls the report tool",
+  "sample_response": {
+    "listing": {
+      "zpid": 27866230,
+      "street_address": "932 Bennington St",
+      "city": "Houston",
+      "state": "TX",
+      "zipcode": "77022",
+      "home_type": "SINGLE_FAMILY",
+      "beds": 4.0,
+      "baths": 3.0,
+      "living_area": 2976.0,
+      "year_built": 1940.0,
+      "lot_acres": 0.162350780532599,
+      "lat": 29.82161,
+      "lon": -95.35883,
+      "days_on_zillow": 301.0,
+      "page_views": 126.0,
+      "favorites": 1.0,
+      "agent_name": "Friday Brume",
+      "broker_name": "RE/MAX East",
+      "mls_id": "8028461",
+      "photo_count": 15.0,
+      "date_posted": "2023-08-08",
+      "hdp_url": "https://www.zillow.com/homedetails/932-Bennington-St-Houston-TX-77022/27866230_zpid/",
+      "list_price": 299900.0
+    },
+    "price": {
+      "asking": 299900.0,
+      "fair": 626888.0,
+      "q10": 513762.0,
+      "q90": 911167.0,
+      "verdict": "low",
+      "asking_vs_fair_pct": -52.2,
+      "range_coverage": 0.8,
+      "receipt": [
+        {
+          "feature": "baseline",
+          "label": "Neighborhood baseline ($14/sqft)",
+          "usd": 42059.0,
+          "pct": 6.7
+        },
+        {
+          "feature": "livingArea",
+          "label": "Size (2,976 sqft)",
+          "usd": -12976.0,
+          "pct": -2.1
+        },
+        {
+          "feature": "age",
+          "label": "Age (84 yrs)",
+          "usd": 407.0,
+          "pct": 0.1
+        },
+        {
+          "feature": "school_mean",
+          "label": "Schools (avg 5.0/10)",
+          "usd": -5267.0,
+          "pct": -0.8
+        },
+        {
+          "feature": "dist_downtown",
+          "label": "Location (6.9 km to Downtown)",
+          "usd": 552776.0,
+          "pct": 88.2
+        },
+        {
+          "feature": "bedrooms",
+          "label": "Bedrooms (4)",
+          "usd": -7512.0,
+          "pct": -1.2
+        },
+        {
+          "feature": "bathrooms",
+          "label": "Bathrooms (3)",
+          "usd": 134.0,
+          "pct": 0.0
+        },
+        {
+          "feature": "other",
+          "label": "Other features & ML adjustment (pool, lot, HOA, text flags)",
+          "usd": 57267.0,
+          "pct": 9.1
+        }
+      ],
+      "comps": [
+        {
+          "zpid": 84053048,
+          "price": 419000.0,
+          "ppsf": 148.6,
+          "dist_km": 0.07,
+          "beds": 3.0,
+          "baths": 4.0,
+          "sqft": 2820.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.822212,
+          "lon": -95.359055
+        },
+        {
+          "zpid": 27866496,
+          "price": 449900.0,
+          "ppsf": 204.5,
+          "dist_km": 0.67,
+          "beds": 3.0,
+          "baths": 3.0,
+          "sqft": 2200.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.827385,
+          "lon": -95.36064
+        },
+        {
+          "zpid": 27866479,
+          "price": 328000.0,
+          "ppsf": 137.4,
+          "dist_km": 0.85,
+          "beds": 5.0,
+          "baths": 2.0,
+          "sqft": 2387.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.826626,
+          "lon": -95.36551
+        },
+        {
+          "zpid": 27865703,
+          "price": 350000.0,
+          "ppsf": 121.4,
+          "dist_km": 1.16,
+          "beds": 5.0,
+          "baths": 3.0,
+          "sqft": 2883.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.829678,
+          "lon": -95.35124
+        },
+        {
+          "zpid": 27875665,
+          "price": 580000.0,
+          "ppsf": 171.8,
+          "dist_km": 1.25,
+          "beds": 3.0,
+          "baths": 3.0,
+          "sqft": 3377.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.812115,
+          "lon": -95.36569
+        },
+        {
+          "zpid": 27875633,
+          "price": 695000.0,
+          "ppsf": 331.0,
+          "dist_km": 1.41,
+          "beds": 3.0,
+          "baths": 2.0,
+          "sqft": 2100.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.810402,
+          "lon": -95.3656
+        },
+        {
+          "zpid": 27875000,
+          "price": 699900.0,
+          "ppsf": 288.3,
+          "dist_km": 1.44,
+          "beds": 3.0,
+          "baths": 3.0,
+          "sqft": 2428.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.808798,
+          "lon": -95.3607
+        },
+        {
+          "zpid": 346714546,
+          "price": 674900.0,
+          "ppsf": 278.0,
+          "dist_km": 1.44,
+          "beds": 3.0,
+          "baths": 3.0,
+          "sqft": 2428.0,
+          "home_type": "SINGLE_FAMILY",
+          "lat": 29.808798,
+          "lon": -95.3607
+        }
+      ],
+      "comps_rule": "same type, beds \u00b11, sqft \u00b130%"
+    },
+    "verification": {
+      "signals": [
+        {
+          "name": "asking_far_below_range",
+          "status": "warning",
+          "evidence": "Asking $299,900 is 58% of the low end of the fair range (q10 $513,762); warning below 85%. Prices far under comparable homes are a common lure in listing scams."
+        },
+        {
+          "name": "duplicate_photos",
+          "status": "ok",
+          "evidence": "No photo is reused by a listing from a different broker.",
+          "related_zpids": []
+        },
+        {
+          "name": "duplicate_description",
+          "status": "ok",
+          "evidence": "Description is not copied by any listing from a different broker.",
+          "related_zpids": []
+        },
+        {
+          "name": "agent_broker_attribution",
+          "status": "ok",
+          "evidence": "Agent Friday Brume (TREC #0542875), broker RE/MAX East, MLS HAR #8028461. Verify the license at trec.texas.gov."
+        },
+        {
+          "name": "size_vs_comps",
+          "status": "ok",
+          "evidence": "2,976 sqft vs median 2,352 sqft for 30 nearby 4-bed homes (1.27x)."
+        },
+        {
+          "name": "engagement_anomaly",
+          "status": "ok",
+          "evidence": "301 days on Zillow, 126 views, 1 saves (within the normal range for its home type)."
+        }
+      ]
+    },
+    "costs": {
+      "monthly": {
+        "mortgage": 1535.6,
+        "tax": 399.87,
+        "hoa": "unknown",
+        "insurance": "unknown",
+        "total_known": 1935.47
+      },
+      "assumptions": [
+        "30-yr fixed rate 6.621% (Zillow Home Loans rate shown on the listing, snapshot 2024-06-05).",
+        "20% down ($59,980); loan $239,920; principal and interest only; no PMI at 20% down.",
+        "Property tax = 1.60% x asking price / 12. Actual tax uses the appraised value, and rates change yearly."
+      ],
+      "unknowns": [
+        "HOA fee not disclosed in the listing (absence does not mean $0).",
+        "Homeowners insurance: no quote (Zillow shows an unverified estimate of $1,260/yr, not included).",
+        "Flood insurance: depends on FEMA zone and elevation, check before buying in Houston.",
+        "MUD/PID district taxes may not be included in the listed tax rate.",
+        "Utilities, maintenance and closing costs are not included."
+      ]
+    },
+    "sources": [
+      {
+        "name": "Zillow listing snapshot",
+        "detail": "Houston Housing Market 2024 dataset (Kaggle), scraped 2024-06-05",
+        "license": "CC BY-NC-SA 4.0"
+      },
+      {
+        "name": "Fair-price range",
+        "detail": "LightGBM quantile models (q10/q50/q90), 5-fold spatial block CV, cross-fold conformal calibration; out-of-fold coverage 0.8 (target 0.80)"
+      },
+      {
+        "name": "Price receipt",
+        "detail": "Geographically weighted regression (k=200, computed in q/kdb+); items sum to the fair price"
+      },
+      {
+        "name": "Comparable homes",
+        "detail": "Nearest listings in the same snapshot (asking prices, not sales)"
+      },
+      {
+        "name": "Mortgage rate",
+        "detail": "Zillow Home Loans 30-yr fixed rate embedded in the listing"
+      }
+    ],
+    "limitations": [
+      "Asking prices only; no closed-sale prices. 'Fair' means consistent with comparable listings.",
+      "One snapshot (June 2024); no market trend adjustment.",
+      "The 80% range is calibrated on average across Houston; individual neighborhoods may be wider or narrower.",
+      "Verification signals are evidence for a human to check, not a fraud score.",
+      "No inspection, title, flood-zone, or permit data."
+    ]
+  }
+}

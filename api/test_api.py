@@ -30,6 +30,35 @@ check("GET /compare", c.get("/compare", params={"zips": "77002,77019,77494"}),
 check("GET /map", c.get("/map", params={"metric": "ppsf"}), lambda j: f"{len(j['features'])} points")
 check("GET /map?zip", c.get("/map", params={"metric": "label", "zip": "77019"}), lambda j: f"{len(j['features'])} points")
 check("GET /stats", c.get("/stats"), lambda j: f"best={j['best_model']}")
+import json as _json  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import jsonschema  # noqa: E402
+
+SCHEMA = _json.loads((Path(__file__).resolve().parents[1] / "docs/REPORT_SCHEMA.json").read_text())
+
+
+def report_ok(j):
+    jsonschema.validate(j, SCHEMA)
+    p = j["price"]
+    s = {x["status"] for x in j["verification"]["signals"]}
+    rsum = sum(i["usd"] for i in p["receipt"])
+    assert not p["receipt"] or abs(rsum - p["fair"]) <= 1, "receipt must sum to fair"
+    return (f"verdict={p['verdict']} fair={p['fair']} q10={p['q10']} q90={p['q90']} comps={len(p['comps'])} "
+            f"signals={sorted(s)} total_known=${j['costs']['monthly']['total_known']:,.0f} schema=valid")
+
+
+check(f"POST /report zpid={zpid}", c.post("/report", json={"zpid": zpid}), report_ok)
+check("POST /report address", c.post("/report", json={"address": "932 Bennington St, Houston, TX"}), report_ok)
+check("POST /report asking override", c.post("/report", json={"zpid": zpid, "asking_price": 2_000_000}),
+      lambda j: report_ok(j) + f" (override verdict={j['price']['verdict']})")
+check("POST /report unmodeled (lot)", c.post("/report", json={"zpid": 351551042}), report_ok)
+r = c.post("/report", json={"address": "no such street 99999"})
+print(f"{'PASS' if r.status_code == 404 else 'FAIL'} {'POST /report not found':<28} {r.status_code}")
+t = time.time()
+check("POST /chat (report tool)", c.post("/chat", json={"message": "Give me the due-diligence report for 932 Bennington St."}),
+      lambda j: f"[{j['mode']}] tools={[x['tool'] for x in j['tool_calls']]} visuals={[v['type'] for v in j['visuals']]} "
+                f"{time.time() - t:.0f}s\n     -> {j['text'][:400]}")
 for mode in ["auto", "json"]:
     t = time.time()
     check(f"POST /chat ({mode})", c.post("/chat", json={"message": "Compare 77019 and 77002 on price per sqft, "
